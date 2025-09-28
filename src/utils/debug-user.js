@@ -39,7 +39,7 @@ function debugUser() {
   // Probar la API directamente
   console.log('🔍 Probando API directamente...');
   
-  fetch('http://localhost:5555/api/auth/me', {
+  fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ function debugUser() {
       if (documento) {
         console.log(`🔍 Probando pendientes por visto bueno con documento: ${documento}`);
         
-        fetch(`http://localhost:5555/api/cambio-turno/pendientes-visto-bueno?documento=${encodeURIComponent(documento)}`, {
+        fetch(`${import.meta.env.VITE_API_URL}/cambio-turno/pendientes-visto-bueno?documento=${encodeURIComponent(documento)}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -88,7 +88,7 @@ async function testLogin() {
   console.log('🔍 Probando login...');
   
   try {
-    const loginResponse = await fetch('http://localhost:5555/api/auth/login', {
+    const loginResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -104,7 +104,7 @@ async function testLogin() {
     
     if (loginData.token) {
       // Probar obtener datos del usuario
-      const userResponse = await fetch('http://localhost:5555/api/auth/me', {
+      const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${loginData.token}`,
           'Content-Type': 'application/json'
@@ -118,7 +118,7 @@ async function testLogin() {
       const documento = userData.documento || userData.empleado?.documento || userData.empleado?.id;
       
       if (documento) {
-        const pendientesResponse = await fetch(`http://localhost:5555/api/cambio-turno/pendientes-visto-bueno?documento=${encodeURIComponent(documento)}`, {
+        const pendientesResponse = await fetch(`${import.meta.env.VITE_API_URL}/cambio-turno/pendientes-visto-bueno?documento=${encodeURIComponent(documento)}`, {
           headers: {
             'Authorization': `Bearer ${loginData.token}`,
             'Content-Type': 'application/json'

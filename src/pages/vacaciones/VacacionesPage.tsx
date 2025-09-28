@@ -170,7 +170,7 @@ const VacacionesPage = () => {
       }
 
       // Cargar datos reales desde el backend
-      const response = await fetch('http://localhost:5555/api/vacaciones', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -336,7 +336,7 @@ const VacacionesPage = () => {
         }
       });
 
-      const response = await fetch('http://localhost:5555/api/vacaciones', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -475,21 +475,21 @@ const VacacionesPage = () => {
       switch (modalType) {
         case 'jefe':
           url = tipoAccion === 'aprobar' 
-            ? `http://localhost:5555/api/vacaciones/${solicitudActual.id}/aprobar-por-jefe`
-            : `http://localhost:5555/api/vacaciones/${solicitudActual.id}/rechazar-por-jefe`;
+            ? `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}/aprobar-por-jefe`
+            : `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}/rechazar-por-jefe`;
           break;
         case 'administrador':
           url = tipoAccion === 'aprobar' 
-            ? `http://localhost:5555/api/vacaciones/${solicitudActual.id}/aprobar-por-administracion`
-            : `http://localhost:5555/api/vacaciones/${solicitudActual.id}/rechazar-por-administracion`;
+            ? `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}/aprobar-por-administracion`
+            : `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}/rechazar-por-administracion`;
           break;
         case 'rrhh':
           url = tipoAccion === 'aprobar' 
-            ? `http://localhost:5555/api/vacaciones/${solicitudActual.id}/aprobar-por-rrhh`
-            : `http://localhost:5555/api/vacaciones/${solicitudActual.id}/rechazar-por-rrhh`;
+            ? `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}/aprobar-por-rrhh`
+            : `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}/rechazar-por-rrhh`;
           break;
         default:
-          url = `http://localhost:5555/api/vacaciones/${solicitudActual.id}`;
+          url = `${import.meta.env.VITE_API_URL}/vacaciones/${solicitudActual.id}`;
       }
 
       // Actualizar la solicitud en el backend

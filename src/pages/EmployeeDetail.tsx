@@ -119,7 +119,7 @@ const EmployeeDetail = () => {
       setIsUploading(false);
     }
   };
-  const baseUrl = "http://localhost:5555/uploads/cv/";
+  const baseUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/cv/`;
 
   const handleDownloadResume = () => {
     if (employee.hoja_vida) {
@@ -164,7 +164,7 @@ const EmployeeDetail = () => {
 
             {employee.foto_perfil ? (
               <img
-              src={`http://localhost:5555/uploads/perfiles/${employee.foto_perfil}`}
+              src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/perfiles/${employee.foto_perfil}`}
                 alt={employee.nombres}
                 className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
               />

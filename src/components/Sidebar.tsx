@@ -111,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               {/* Foto de perfil del usuario */}
               {(user.empleado as any)?.foto_perfil ? (
                 <img 
-                  src={`http://localhost:5555/uploads/perfiles/${(user.empleado as any).foto_perfil}`}
+                  src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/perfiles/${(user.empleado as any).foto_perfil}`}
                   alt="Foto de perfil"
                   className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                   onError={(e) => {
@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               {/* Foto de perfil del usuario (versión colapsada) */}
               {(user.empleado as any)?.foto_perfil ? (
                 <img 
-                  src={`http://localhost:5555/uploads/perfiles/${(user.empleado as any).foto_perfil}`}
+                  src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/perfiles/${(user.empleado as any).foto_perfil}`}
                   alt="Foto de perfil"
                   className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700 cursor-pointer"
                   title={`${user.empleado?.nombres || user.name || 'Usuario'} - ${user.roles?.[0]?.nombre || user.empleado?.oficio || 'Sin rol'}`}

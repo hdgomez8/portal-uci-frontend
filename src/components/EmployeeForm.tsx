@@ -647,7 +647,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
             <div className="relative w-32 h-32 mx-auto">
               <img
                 id="photo-preview"
-                src={formData.foto_perfil ? `http://localhost:5555/uploads/perfiles/${formData.foto_perfil}` : ''}
+                src={formData.foto_perfil ? `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/perfiles/${formData.foto_perfil}` : ''}
                 alt="Vista previa"
                 className={`w-full h-full object-cover rounded-full border-4 border-gray-200 dark:border-gray-700 ${
                   formData.foto_perfil ? 'block' : 'hidden'
@@ -728,7 +728,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                   <button
                     type="button"
                     onClick={() => {
-                      const url = `http://localhost:5555/uploads/cv/${formData.hoja_vida}`;
+                      const url = `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/cv/${formData.hoja_vida}`;
                       window.open(url, '_blank');
                     }}
                     className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200"
@@ -893,7 +893,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                         title="Descargar firma"
                         onClick={() => {
                           const link = document.createElement('a');
-                          link.href = `http://localhost:5555/uploads/firmas/${formData.firma}`;
+                          link.href = `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/firmas/${formData.firma}`;
                           link.download = 'firma-empleado.png';
                           link.click();
                         }}

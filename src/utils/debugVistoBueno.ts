@@ -7,7 +7,7 @@ export const debugVistoBueno = async (documento: string | number) => {
     console.log('Tipo de documento:', typeof documento);
     
     // Hacer la petición directamente
-    const response = await fetch(`http://localhost:5555/api/cambio-turno/pendientes-visto-bueno?documento=${encodeURIComponent(documento.toString())}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/cambio-turno/pendientes-visto-bueno?documento=${encodeURIComponent(documento.toString())}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

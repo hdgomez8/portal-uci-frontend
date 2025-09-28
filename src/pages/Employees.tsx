@@ -219,7 +219,7 @@ const Employees = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {filteredEmployees.map((employee) => {
-          const baseUrl = "http://localhost:5555/uploads/perfiles/";
+          const baseUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/perfiles/`;
           const profileImage = employee.foto_perfil ? `${baseUrl}${employee.foto_perfil}` : null;
 
           return (

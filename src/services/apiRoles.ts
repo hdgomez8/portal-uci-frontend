@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiRoles = axios.create({
-  baseURL: 'http://localhost:5555/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5555/api',
   headers: {
     'Content-Type': 'application/json',
   },

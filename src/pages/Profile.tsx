@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5555/api/perfil/mi-perfil', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/perfil/mi-perfil`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -66,7 +66,7 @@ const Profile: React.FC = () => {
   const fetchCurrentSignature = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5555/api/perfil/mi-perfil/firma', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/perfil/mi-perfil/firma`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -119,7 +119,7 @@ const Profile: React.FC = () => {
       const formData = new FormData();
       formData.append('firma', selectedFile);
 
-      const response = await fetch('http://localhost:5555/api/perfil/mi-perfil/firma', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/perfil/mi-perfil/firma`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -152,7 +152,7 @@ const Profile: React.FC = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5555/api/perfil/mi-perfil', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/perfil/mi-perfil`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -327,7 +327,7 @@ const Profile: React.FC = () => {
                   </h4>
                   <div className="flex items-center space-x-4">
                     <img
-                      src={`http://localhost:5555${currentSignature}`}
+                      src={`${import.meta.env.VITE_API_URL?.replace('/api', '')}${currentSignature}`}
                       alt="Firma actual"
                       className="max-w-xs max-h-32 object-contain border border-gray-200 dark:border-gray-600 rounded"
                     />
