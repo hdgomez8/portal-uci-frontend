@@ -4,11 +4,13 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5555/api";
 
 // Configurar axios con interceptor para token
 const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+    baseURL: API_URL,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    timeout: 30000, // 30 segundos de timeout
+    timeoutErrorMessage: 'La solicitud tardó demasiado en responder. Por favor, inténtalo de nuevo.',
+  });
 
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {

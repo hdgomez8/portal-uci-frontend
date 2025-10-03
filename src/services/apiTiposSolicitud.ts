@@ -8,6 +8,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 segundos de timeout
+  timeoutErrorMessage: 'La solicitud tardó demasiado en responder. Por favor, inténtalo de nuevo.',
 });
 
 // Interceptor para agregar el token a las peticiones

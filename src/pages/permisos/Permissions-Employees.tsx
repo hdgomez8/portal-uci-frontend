@@ -1303,7 +1303,7 @@ const Permissions = () => {
                           <div className="flex items-center space-x-3">
                             <span className="text-green-500 text-lg">{archivo.tipo_mime.includes("image") ? "🖼️" : "📄"}</span>
                             <a
-                              href={`http://localhost:5000/${archivo.ruta_archivo}`}
+                              href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${archivo.ruta_archivo}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm text-blue-600 hover:underline truncate max-w-xs"
@@ -1312,7 +1312,7 @@ const Permissions = () => {
                             </a>
                           </div>
                           <a
-                            href={`http://localhost:5000/${archivo.ruta_archivo}`}
+                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${archivo.ruta_archivo}`}
                             download={archivo.nombre_archivo}
                             className="ml-3 text-green-500 hover:text-green-700 transition"
                           >
