@@ -182,15 +182,12 @@ const Employees = () => {
     }
 
     try {
-      console.log('🗑️ Eliminando empleado:', employee.nombres);
       await employeeService.delete(employee.id.toString());
       
       // Actualizar la lista local sin hacer una nueva petición
       setEmployees(prevEmployees => 
         prevEmployees.filter(emp => emp.id !== employee.id)
       );
-      
-      console.log('✅ Empleado eliminado exitosamente');
     } catch (err: any) {
       console.error('❌ Error al eliminar empleado:', err);
       const errorMessage = err.response?.data?.message || 'Error al eliminar empleado';

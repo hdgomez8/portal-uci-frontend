@@ -28,23 +28,17 @@ const Permissions = () => {
   
   // Función para obtener el área del usuario
   const obtenerAreaUsuario = () => {
-    console.log('🔍 Debug obteniendo área del usuario:', user);
-    
     // La estructura correcta según el backend es: user.empleado.areas[0].nombre
     const area = user?.empleado?.areas?.[0]?.nombre || 'No asignada';
     
-    console.log('📋 Área encontrada:', area);
     return area;
   };
   
   // Función para obtener el jefe del usuario
   const obtenerJefeUsuario = () => {
-    console.log('🔍 Debug obteniendo jefe del usuario:', user);
-    
     // La estructura correcta según el backend es: user.empleado.areas[0].jefe.nombres
     const jefe = user?.empleado?.areas?.[0]?.jefe?.nombres || 'No asignado';
     
-    console.log('📋 Jefe encontrado:', jefe);
     return jefe;
   };
   
@@ -116,7 +110,6 @@ const Permissions = () => {
     try {
       // Si ya está en formato YYYY-MM-DD, usarlo directamente
       if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        console.log("✅ Fecha ya en formato correcto:", dateString);
         return dateString;
       }
       
@@ -126,7 +119,6 @@ const Permissions = () => {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const result = `${year}-${month}-${day}`;
-      console.log("📅 Fecha convertida:", dateString, "->", result);
       return result;
     } catch (error) {
       console.error('Error asegurando fecha correcta:', error);
@@ -200,7 +192,6 @@ const Permissions = () => {
       if (user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA')) {
         // Obtener solo las solicitudes de los empleados del jefe (excluyendo las del propio jefe)
         data = await obtenerPermisosPorJefe(Number(user.empleado?.id));
-        console.log('Solicitudes de empleados del jefe:', data);
       } else {
         // Solo las del empleado logueado
         data = await obtenerPermisosPorEmpleado(Number(user.empleado?.id));
@@ -245,7 +236,6 @@ const Permissions = () => {
     try {
       const response = await tiposSolicitudService.getAllTipos();
       setTiposSolicitud(response.data);
-      console.log('Tipos de solicitud cargados:', response.data);
     } catch (err) {
       console.error("Error al cargar tipos de solicitud:", err);
       setError("Error al cargar los tipos de solicitud");
@@ -268,27 +258,8 @@ const Permissions = () => {
       return;
     }
     
-    // Logs detallados para debugging
-    console.log("🔍 DEBUG - Fecha del permiso:");
-    console.log("  - newPermission.fecha_permiso:", newPermission.fecha_permiso);
-    console.log("  - Tipo de dato:", typeof newPermission.fecha_permiso);
-    console.log("  - Fecha actual:", fechaActual);
-    console.log("  - Fecha actual tipo:", typeof fechaActual);
-    
-    // Verificar si la fecha es válida
-    if (newPermission.fecha_permiso) {
-      const fechaPermiso = new Date(newPermission.fecha_permiso);
-      console.log("  - Fecha como objeto Date:", fechaPermiso);
-      console.log("  - Fecha ISO string:", fechaPermiso.toISOString());
-      console.log("  - Fecha local string:", fechaPermiso.toLocaleDateString());
-      console.log("  - Zona horaria offset:", fechaPermiso.getTimezoneOffset());
-    }
-    
     // Asegurar que la fecha se envíe correctamente
     const fechaPermisoCorregida = ensureCorrectDate(newPermission.fecha_permiso);
-    console.log("  - Fecha corregida para envío:", fechaPermisoCorregida);
-    
-    console.log("🚀 Datos a enviar:", newPermission, archivos);
 
     try {
       const formData = new FormData();
@@ -302,7 +273,6 @@ const Permissions = () => {
       // Agregar datos del permiso al formData
       Object.entries(datosEnviar).forEach(([key, value]) => {
         formData.append(key, value);
-        console.log(`📤 Enviando ${key}:`, value);
       });
 
       // Agregar archivos al formData
@@ -615,10 +585,6 @@ const Permissions = () => {
   // Usar directamente permissions ya que el filtrado se hace en fetchPermissions
   const permisosFiltrados = permissions;
 
-  console.log("Usuario autenticado:", user);
-  console.log("ID del empleado autenticado:", user.empleado?.id);
-  console.log("Roles del usuario:", user?.roles);
-  console.log("¿Es jefe de área?:", user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA'));
 
   if (loading) {
     return <Loader text="Cargando permisos..." />;

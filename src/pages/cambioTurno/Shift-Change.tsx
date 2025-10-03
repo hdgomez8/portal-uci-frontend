@@ -100,27 +100,19 @@ const ShiftChange = () => {
     // Para gerentes/jefes, determinar el departamento que gestionan
     const departamentoPersonal = user?.empleado?.areas?.[0]?.departamento?.nombre;
     
-    console.log('🔍 Debug departamento gestionado:');
-    console.log('   Roles del usuario:', user?.roles?.map((r: any) => r.nombre));
-    console.log('   Departamento personal:', departamentoPersonal);
-    
     // Mapeo de departamentos gestionados según el rol y departamento personal
     if (user?.roles?.some((rol: any) => rol.nombre === 'GERENTE')) {
       // Gerentes gestionan ASISTENCIAL independientemente de su departamento personal
-      console.log('   → Usuario es GERENTE, gestiona ASISTENCIAL');
       return 'ASISTENCIAL';
     } else if (user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA')) {
       // Jefes de área gestionan su propio departamento
-      console.log('   → Usuario es JEFE AREA, gestiona:', departamentoPersonal);
       return departamentoPersonal;
     } else if (user?.roles?.some((rol: any) => rol.nombre === 'ADMINISTRADOR')) {
       // Admins pueden gestionar todos los departamentos
-      console.log('   → Usuario es ADMIN, gestiona TODOS');
       return 'TODOS';
     }
     
     // Para otros casos, usar el departamento personal
-    console.log('   → Usuario con otro rol, gestiona:', departamentoPersonal);
     return departamentoPersonal;
   };
 
@@ -178,11 +170,6 @@ const ShiftChange = () => {
       solicitudesParaEstadisticas = solicitudes;
     }
     
-    console.log('🔍 Debug estadísticas:');
-    console.log('   Roles del usuario:', user?.roles?.map((r: any) => r.nombre));
-    console.log('   Departamento gestionado:', obtenerDepartamentoGestionado());
-    console.log('   Total solicitudes:', solicitudes.length);
-    console.log('   Solicitudes filtradas:', solicitudesParaEstadisticas.length);
     
     return {
       totalCambios: solicitudesParaEstadisticas.length,
@@ -294,20 +281,11 @@ const ShiftChange = () => {
       let response;
       
       if (tieneRolSupervision) {
-        console.log(`🔍 Usuario con rol de supervisión, enviando jefeId: ${user?.id}`);
         response = await cambioTurnoService.listarConJefe(user?.id);
       } else {
         // Para usuarios normales, cargar solo sus propias solicitudes
         const empleadoId = user?.empleado?.id || user?.id;
-        console.log(`🔍 Usuario sin rol de supervisión, cargando solicitudes del empleado: ${empleadoId}`);
-        console.log(`🔍 Datos del usuario:`, {
-          user_id: user?.id,
-          empleado_id: user?.empleado?.id,
-          empleado_nombres: user?.empleado?.nombres,
-          empleado_documento: user?.empleado?.documento
-        });
         response = await cambioTurnoService.listarPorEmpleado(empleadoId);
-        console.log(`🔍 Respuesta del servidor:`, response.data);
       }
       
       setSolicitudes(response.data);

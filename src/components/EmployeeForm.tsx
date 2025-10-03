@@ -622,7 +622,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    console.log('Foto de perfil:', file);
                     // Aquí puedes mostrar preview
                     const reader = new FileReader();
                     reader.onload = (e) => {
@@ -695,7 +694,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    console.log('Hoja de vida:', file);
                     // Actualizar nombre del archivo
                     const fileNameElement = document.getElementById('cv-file-name');
                     if (fileNameElement) {
@@ -821,7 +819,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                   className="btn-primary w-full"
                   onClick={() => {
                     // Aquí implementarías la funcionalidad de firma digital
-                    console.log('Abrir editor de firma');
                     // Simular apertura de modal de firma
                     alert('Funcionalidad de firma digital - En desarrollo');
                   }}
@@ -842,7 +839,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                     input.onchange = (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0];
                       if (file) {
-                        console.log('Firma subida:', file);
                         // Aquí procesarías la subida
                       }
                     };
@@ -911,7 +907,6 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSave, onCancel 
                             try {
                               await employeeService.deleteSignature(employee.id.toString());
                               setFormData(prev => ({ ...prev, firma: undefined }));
-                              console.log('Firma eliminada correctamente');
                             } catch (error) {
                               console.error('Error eliminando firma:', error);
                             }
