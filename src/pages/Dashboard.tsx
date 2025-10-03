@@ -72,13 +72,7 @@ const Dashboard = () => {
   const isJefe = user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA');
   const showEmployeeTabs = isEmpleado || isJefe;
   
-  // Logs de depuración
-  console.log('Usuario:', user);
-  console.log('Roles del usuario:', user?.roles);
-  console.log('¿Es empleado?:', isEmpleado);
-  console.log('¿Es jefe de área?:', isJefe);
-  console.log('¿Mostrar pestañas de empleado?:', showEmployeeTabs);
-  
+
   const [activeTab, setActiveTab] = useState('permissions');
   const [stats, setStats] = useState<DashboardStats>({
     totalEmpleados: 0,
@@ -1061,9 +1055,6 @@ const Dashboard = () => {
   if (loading) {
     return <Loader text="Cargando panel de control..." />;
   }
-
-  // Log de depuración para las pestañas
-  console.log('Pestañas mostradas:', showEmployeeTabs ? employeeTabs : tabs);
 
   return (
     <div className="space-y-6">
