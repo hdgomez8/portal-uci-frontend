@@ -15,8 +15,45 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // 🔍 DEBUG DETALLADO DE PETICIONES
+  console.log('🔍 ===== REQUEST DEBUG =====');
+  console.log('🌐 URL:', config.url);
+  console.log('📋 Method:', config.method?.toUpperCase());
+  console.log('🔑 Headers:', config.headers);
+  console.log('📦 Data:', config.data);
+  console.log('🕐 Timestamp:', new Date().toISOString());
+  console.log('🔍 ===== END REQUEST DEBUG =====');
+  
   return config;
 });
+
+// Interceptor para manejar respuestas y errores
+api.interceptors.response.use(
+  (response) => {
+    // 🔍 DEBUG DETALLADO DE RESPUESTAS
+    console.log('🔍 ===== RESPONSE DEBUG =====');
+    console.log('📊 Status:', response.status);
+    console.log('📝 Data:', response.data);
+    console.log('🔑 Headers:', response.headers);
+    console.log('🕐 Timestamp:', new Date().toISOString());
+    console.log('🔍 ===== END RESPONSE DEBUG =====');
+    
+    return response;
+  },
+  (error) => {
+    // 🔍 DEBUG DETALLADO DE ERRORES
+    console.log('🔍 ===== ERROR DEBUG =====');
+    console.log('❌ Error:', error.message);
+    console.log('📊 Status:', error.response?.status);
+    console.log('📝 Data:', error.response?.data);
+    console.log('🔑 Headers:', error.response?.headers);
+    console.log('🕐 Timestamp:', new Date().toISOString());
+    console.log('🔍 ===== END ERROR DEBUG =====');
+    
+    return Promise.reject(error);
+  }
+);
 
 export const userService = {
   getUsers: () => api.get('/usuarios'),

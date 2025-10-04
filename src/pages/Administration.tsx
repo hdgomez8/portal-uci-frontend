@@ -5,6 +5,7 @@ import { permisosSistemaService } from '../services/apiPermisos';
 import { estructuraService } from '../services/apiEstructura';
 import CreateUserEmployeeModal from '../components/CreateUserEmployeeModal';
 import PermissionDeniedAlert from '../components/PermissionDeniedAlert';
+import { DiagnosticoCorreos } from '../components/DiagnosticoCorreos';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { exportUsuariosToExcel, exportDepartamentosToExcel, exportAreasToExcel } from '../utils/excelExport';
@@ -1202,6 +1203,14 @@ const Administration = () => {
               )}
             </div>
           )}
+          
+          {/* Componente de Diagnóstico de Correos */}
+          {adminActiveTab === 'users' && (
+            <div className="mt-8">
+              <DiagnosticoCorreos />
+            </div>
+          )}
+          
           {adminActiveTab === 'roles' && (
             <RolesPermisosAdmin />
           )}

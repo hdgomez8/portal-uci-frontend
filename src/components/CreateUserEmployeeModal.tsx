@@ -131,19 +131,70 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 🔍 DEBUG INTEGRADO CON SISTEMA DE MONITOREO
+    console.log('🔍 ===== INICIO CREACIÓN DE USUARIO =====');
+    console.log('📋 Datos del formulario:', formData);
+    console.log('📧 Email del usuario:', formData.email);
+    console.log('👤 Nombres del usuario:', formData.nombres);
+    console.log('📄 Documento del usuario:', formData.documento);
+    console.log('🕐 Timestamp inicio:', new Date().toISOString());
+    
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
+      // Validaciones adicionales
+      if (!formData.email || !formData.nombres || !formData.documento) {
+        console.error('❌ Error: Faltan campos requeridos');
+        setError('Por favor, completa todos los campos requeridos');
+        return;
+      }
+      
+      // Validar formato de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        console.error('❌ Error: Formato de email inválido');
+        setError('Por favor, ingresa un email válido');
+        return;
+      }
+      
+      console.log('✅ Validaciones pasadas, enviando datos...');
+      
       // Validar que la contraseña sea igual al documento
       const userData = {
         ...formData,
-        password: formData.documento // La contraseña será igual al documento
+        password: formData.documento, // La contraseña será igual al documento
+        timestamp: new Date().toISOString()
       };
 
-      await userService.createUser(userData);
-      setSuccess('Usuario y empleado creados exitosamente');
+      console.log('📤 Enviando datos al servidor:', userData);
+      
+      const response = await userService.createUser(userData);
+      
+      // 📥 RESPUESTA DEL SERVIDOR
+      console.log('📥 Respuesta del servidor recibida:');
+      console.log('📊 Status:', response.status);
+      console.log('📝 Datos de respuesta:', response.data);
+      console.log('🕐 Timestamp respuesta:', new Date().toISOString());
+      
+      console.log('✅ Usuario creado exitosamente en la base de datos');
+      console.log('🆔 ID del usuario creado:', response.data?.id);
+      console.log('📧 Email del usuario creado:', response.data?.email);
+      
+      // 🔍 VERIFICAR ESTADO DEL DIAGNÓSTICO DE CORREOS
+      console.log('🔍 Verificando estado del diagnóstico de correos...');
+      await verificarDiagnosticoCorreos();
+      
+      // Verificar si hay información sobre el correo
+      if (response.data?.emailSent) {
+        console.log('📧 ✅ Correo enviado exitosamente');
+        setSuccess('Usuario creado y correo enviado exitosamente');
+      } else {
+        console.warn('⚠️ No se confirmó el envío del correo');
+        setSuccess('Usuario creado, pero verifica el estado del correo');
+      }
       
       // Limpiar formulario
       setFormData({
@@ -167,10 +218,48 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       }, 1500);
 
     } catch (err: any) {
-      console.error('Error creando usuario:', err);
-      setError(err.response?.data?.message || 'Error al crear el usuario');
+      console.error('❌ Error al crear usuario:', err);
+      console.error('📊 Status del error:', err.response?.status);
+      console.error('📝 Mensaje del error:', err.response?.data?.message);
+      console.error('🔍 Detalles del error:', err.response?.data);
+      
+      // 🔍 VERIFICAR DIAGNÓSTICO EN CASO DE ERROR
+      console.log('🔍 Verificando diagnóstico de correos debido al error...');
+      await verificarDiagnosticoCorreos();
+      
+      const errorMessage = err.response?.data?.message || 'Error al crear el usuario';
+      setError(errorMessage);
     } finally {
       setLoading(false);
+      console.log('🔍 ===== FIN CREACIÓN DE USUARIO =====');
+    }
+  };
+
+  // 🔍 FUNCIÓN PARA VERIFICAR DIAGNÓSTICO DE CORREOS
+  const verificarDiagnosticoCorreos = async () => {
+    try {
+      console.log('🔍 Consultando estado del diagnóstico de correos...');
+      const response = await fetch('/api/diagnostico/estado');
+      const diagnostico = await response.json();
+      
+      console.log('📊 Estado del diagnóstico:', diagnostico);
+      
+      if (diagnostico.ejecutando) {
+        console.log('⏳ Diagnóstico en ejecución...');
+      } else if (diagnostico.resultado === 'exitoso') {
+        console.log('✅ Diagnóstico completado exitosamente');
+        console.log('📋 Pasos ejecutados:', diagnostico.pasos.length);
+      } else if (diagnostico.resultado === 'error') {
+        console.log('❌ Diagnóstico falló');
+        console.log('🔍 Último error:', diagnostico.error);
+      }
+      
+      // Mostrar pasos recientes
+      const pasosRecientes = diagnostico.pasos.slice(-3);
+      console.log('📋 Últimos pasos del diagnóstico:', pasosRecientes);
+      
+    } catch (error) {
+      console.error('❌ Error consultando diagnóstico:', error);
     }
   };
 
