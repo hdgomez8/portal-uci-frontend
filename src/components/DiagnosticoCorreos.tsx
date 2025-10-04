@@ -37,8 +37,9 @@ export const DiagnosticoCorreos: React.FC = () => {
   };
 
   const getProgresoPorcentaje = () => {
-    if (!estado || estado.totalPasos === 0) return 0;
-    return Math.round((estado.pasos.length / estado.totalPasos) * 100);
+    if (!estado || !estado.totalPasos || estado.totalPasos === 0) return 0;
+    const pasosCompletados = estado.pasos?.length || 0;
+    return Math.round((pasosCompletados / estado.totalPasos) * 100);
   };
 
   return (
@@ -78,7 +79,7 @@ export const DiagnosticoCorreos: React.FC = () => {
               )}
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {estado.pasos.length} de {estado.totalPasos} pasos
+              {estado.pasos?.length || 0} de {estado.totalPasos || 0} pasos
             </div>
           </div>
 
@@ -91,7 +92,7 @@ export const DiagnosticoCorreos: React.FC = () => {
           </div>
 
           {/* Lista de Pasos */}
-          {estado.pasos.length > 0 && (
+          {estado.pasos && estado.pasos.length > 0 && (
             <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md">
               {estado.pasos.map((paso) => (
                 <div 
