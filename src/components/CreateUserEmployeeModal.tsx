@@ -178,6 +178,9 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       console.log('📊 Status:', response.status);
       console.log('📝 Datos de respuesta:', response.data);
       console.log('🔍 Estructura completa de la respuesta:', JSON.stringify(response.data, null, 2));
+      console.log('🔍 Tipo de datos de respuesta:', typeof response.data);
+      console.log('🔍 Es array?', Array.isArray(response.data));
+      console.log('🔍 Es objeto?', typeof response.data === 'object' && response.data !== null);
       console.log('🕐 Timestamp respuesta:', new Date().toISOString());
       
       console.log('✅ Usuario creado exitosamente en la base de datos');
@@ -254,6 +257,9 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       
       console.log('📊 Estado del diagnóstico:', diagnostico);
       console.log('🔍 Estructura completa del diagnóstico:', JSON.stringify(diagnostico, null, 2));
+      console.log('🔍 Tipo de datos del diagnóstico:', typeof diagnostico);
+      console.log('🔍 Es array?', Array.isArray(diagnostico));
+      console.log('🔍 Es objeto?', typeof diagnostico === 'object' && diagnostico !== null);
       
       if (diagnostico.ejecutando) {
         console.log('⏳ Diagnóstico en ejecución...');
