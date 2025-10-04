@@ -177,11 +177,13 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       console.log('📥 Respuesta del servidor recibida:');
       console.log('📊 Status:', response.status);
       console.log('📝 Datos de respuesta:', response.data);
+      console.log('🔍 Estructura completa de la respuesta:', JSON.stringify(response.data, null, 2));
       console.log('🕐 Timestamp respuesta:', new Date().toISOString());
       
       console.log('✅ Usuario creado exitosamente en la base de datos');
       console.log('🆔 ID del usuario creado:', response.data?.id);
       console.log('📧 Email del usuario creado:', response.data?.email);
+      console.log('🔍 Todos los campos disponibles en la respuesta:', Object.keys(response.data || {}));
       
       // 🔍 VERIFICAR ESTADO DEL DIAGNÓSTICO DE CORREOS
       console.log('🔍 Verificando estado del diagnóstico de correos...');
@@ -240,26 +242,44 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
     try {
       console.log('🔍 Consultando estado del diagnóstico de correos...');
       const response = await fetch('/api/diagnostico/estado');
+      
+      console.log('📊 Status de la respuesta del diagnóstico:', response.status);
+      console.log('📊 Headers de la respuesta del diagnóstico:', response.headers);
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
       const diagnostico = await response.json();
       
       console.log('📊 Estado del diagnóstico:', diagnostico);
+      console.log('🔍 Estructura completa del diagnóstico:', JSON.stringify(diagnostico, null, 2));
       
       if (diagnostico.ejecutando) {
         console.log('⏳ Diagnóstico en ejecución...');
       } else if (diagnostico.resultado === 'exitoso') {
         console.log('✅ Diagnóstico completado exitosamente');
-        console.log('📋 Pasos ejecutados:', diagnostico.pasos.length);
+        console.log('📋 Pasos ejecutados:', diagnostico.pasos?.length || 0);
       } else if (diagnostico.resultado === 'error') {
         console.log('❌ Diagnóstico falló');
         console.log('🔍 Último error:', diagnostico.error);
+      } else {
+        console.log('ℹ️ Diagnóstico no ejecutado aún');
+        console.log('🔍 Estado actual:', diagnostico.ejecutando ? 'ejecutando' : 'no ejecutando');
       }
       
       // Mostrar pasos recientes
-      const pasosRecientes = diagnostico.pasos.slice(-3);
-      console.log('📋 Últimos pasos del diagnóstico:', pasosRecientes);
+      if (diagnostico.pasos && diagnostico.pasos.length > 0) {
+        const pasosRecientes = diagnostico.pasos.slice(-3);
+        console.log('📋 Últimos pasos del diagnóstico:', pasosRecientes);
+      } else {
+        console.log('📋 No hay pasos de diagnóstico disponibles');
+      }
       
     } catch (error) {
       console.error('❌ Error consultando diagnóstico:', error);
+      console.error('🔍 Detalles del error:', error.message);
+      console.error('🔍 Stack trace:', error.stack);
     }
   };
 
