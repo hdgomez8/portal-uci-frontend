@@ -20,6 +20,8 @@ interface EstadoDiagnostico {
 export const useDiagnosticoCorreos = () => {
   const [estado, setEstado] = useState<EstadoDiagnostico | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mensaje, setMensaje] = useState<string>('');
+  const [tipoMensaje, setTipoMensaje] = useState<'success' | 'error' | 'info' | 'warning'>('info');
 
   const obtenerEstado = async () => {
     try {
@@ -42,6 +44,9 @@ export const useDiagnosticoCorreos = () => {
 
   const ejecutarDiagnostico = async () => {
     setLoading(true);
+    setMensaje('🚀 Iniciando diagnóstico de correos...');
+    setTipoMensaje('info');
+    
     try {
       console.log('🚀 Ejecutando diagnóstico de correos...');
       const response = await fetch('/api/diagnostico/ejecutar', {
@@ -57,10 +62,25 @@ export const useDiagnosticoCorreos = () => {
       
       const data = await response.json();
       console.log('📊 Diagnóstico iniciado:', data);
+      
+      // Mostrar feedback visual basado en la respuesta
+      if (data.status === 'success') {
+        setMensaje('✅ Correo de prueba enviado exitosamente a hdgomez0@gmail.com');
+        setTipoMensaje('success');
+      } else if (data.status === 'error') {
+        setMensaje(`❌ Error enviando correo: ${data.message || 'Error desconocido'}`);
+        setTipoMensaje('error');
+      } else {
+        setMensaje('📧 Procesando envío de correo de prueba...');
+        setTipoMensaje('info');
+      }
+      
       setEstado(data);
       return data;
     } catch (error) {
       console.error('❌ Error ejecutando diagnóstico:', error);
+      setMensaje(`❌ Error de conexión: ${error.message}`);
+      setTipoMensaje('error');
       return null;
     } finally {
       setLoading(false);
@@ -114,6 +134,8 @@ export const useDiagnosticoCorreos = () => {
   return {
     estado,
     loading,
+    mensaje,
+    tipoMensaje,
     obtenerEstado,
     ejecutarDiagnostico,
     resetearDiagnostico

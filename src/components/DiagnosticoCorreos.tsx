@@ -2,7 +2,7 @@ import React from 'react';
 import { useDiagnosticoCorreos } from '../hooks/useDiagnosticoCorreos';
 
 export const DiagnosticoCorreos: React.FC = () => {
-  const { estado, loading, ejecutarDiagnostico, resetearDiagnostico } = useDiagnosticoCorreos();
+  const { estado, loading, mensaje, tipoMensaje, ejecutarDiagnostico, resetearDiagnostico } = useDiagnosticoCorreos();
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
@@ -81,23 +81,34 @@ export const DiagnosticoCorreos: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={ejecutarDiagnostico}
               disabled={loading || estado?.ejecutando}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               {loading ? (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Ejecutando...</span>
+                  <span>Enviando...</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <span>🚀</span>
-                  <span>Ejecutar Diagnóstico</span>
+                  <span>📧</span>
+                  <span>Enviar Correo de Prueba</span>
                 </div>
               )}
+            </button>
+            
+            <button
+              onClick={ejecutarDiagnostico}
+              disabled={loading || estado?.ejecutando}
+              className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <div className="flex items-center space-x-2">
+                <span>🔍</span>
+                <span>Diagnóstico Completo</span>
+              </div>
             </button>
             
             <button
@@ -131,6 +142,45 @@ export const DiagnosticoCorreos: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Feedback Visual del Diagnóstico */}
+      {mensaje && (
+        <div className={`mb-6 p-4 rounded-lg border-l-4 ${
+          tipoMensaje === 'success' ? 'bg-green-50 border-green-400 text-green-700 dark:bg-green-900/20 dark:text-green-300' :
+          tipoMensaje === 'error' ? 'bg-red-50 border-red-400 text-red-700 dark:bg-red-900/20 dark:text-red-300' :
+          tipoMensaje === 'warning' ? 'bg-yellow-50 border-yellow-400 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300' :
+          'bg-blue-50 border-blue-400 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className={`p-2 rounded-full ${
+              tipoMensaje === 'success' ? 'bg-green-100 dark:bg-green-800' :
+              tipoMensaje === 'error' ? 'bg-red-100 dark:bg-red-800' :
+              tipoMensaje === 'warning' ? 'bg-yellow-100 dark:bg-yellow-800' :
+              'bg-blue-100 dark:bg-blue-800'
+            }`}>
+              <span className="text-lg">
+                {tipoMensaje === 'success' ? '✅' :
+                 tipoMensaje === 'error' ? '❌' :
+                 tipoMensaje === 'warning' ? '⚠️' : 'ℹ️'}
+              </span>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold">
+                {tipoMensaje === 'success' ? 'Diagnóstico Exitoso' :
+                 tipoMensaje === 'error' ? 'Error en el Diagnóstico' :
+                 tipoMensaje === 'warning' ? 'Advertencia' : 'Información'}
+              </h4>
+              <p className="text-sm mt-1">{mensaje}</p>
+            </div>
+            {tipoMensaje === 'success' && (
+              <div className="text-right">
+                <div className="text-xs text-green-600 dark:text-green-400">Correo enviado</div>
+                <div className="text-sm font-medium">hdgomez0@gmail.com</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {estado && (
         <div className="space-y-6">
