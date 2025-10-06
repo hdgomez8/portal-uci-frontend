@@ -1096,34 +1096,51 @@ const Administration = () => {
                           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-800">
                               <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombres</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Correo</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombres</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Correo</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Roles</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                               {usuariosPaginados.length > 0 ? (
                                 usuariosPaginados.map((user) => (
                                   <tr key={user.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                       <div className="text-sm text-gray-500 dark:text-gray-400">{user.empleado.documento}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                      <div className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                        {user.empleado.nombres}
-                                        {departamentos.filter(dep => String(dep.gerente_id) === String(user.empleado.id)).map(dep => (
-                                          <span key={dep.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold" title={`Jefe de Departamento: ${dep.nombre}`}> 
-                                            <BadgeCheck className="w-4 h-4" /> Jefe Dpto: {dep.nombre}
-                                          </span>
-                                        ))}
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                        <div className="flex items-center gap-2">
+                                          {user.empleado.nombres}
+                                          {departamentos.filter(dep => String(dep.gerente_id) === String(user.empleado.id)).map(dep => (
+                                            <span key={dep.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold" title={`Jefe de Departamento: ${dep.nombre}`}> 
+                                              <BadgeCheck className="w-4 h-4" /> Jefe Dpto: {dep.nombre}
+                                            </span>
+                                          ))}
+                                        </div>
+                                        {/* Mostrar email en móvil */}
+                                        <div className="text-xs text-gray-500 dark:text-gray-400 sm:hidden mt-1">
+                                          {user.email}
+                                        </div>
+                                        {/* Mostrar roles en móvil */}
+                                        <div className="flex flex-wrap gap-1 mt-1 md:hidden">
+                                          {user.roles.slice(0, 2).map((rol, index) => (
+                                            <span key={index} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                              {rol.nombre}
+                                            </span>
+                                          ))}
+                                          {user.roles.length > 2 && (
+                                            <span className="text-xs text-gray-500">+{user.roles.length - 2}</span>
+                                          )}
+                                        </div>
                                       </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                                       <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                                       <div className="flex flex-wrap gap-1">
                                         {user.roles.map((rol, index) => (
                                           <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -1132,14 +1149,14 @@ const Administration = () => {
                                         ))}
                                       </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                      <div className="flex space-x-2">
-                                        <button onClick={() => openEditModal(user)} className="text-primary hover:text-primary/80">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                      <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
+                                        <button onClick={() => openEditModal(user)} className="text-primary hover:text-primary/80 text-xs sm:text-sm">
                                           Editar
                                         </button>
                                         <button 
                                           onClick={() => handleDeleteUser(user.id, user.empleado.nombres)} 
-                                          className="text-red-600 hover:text-red-800"
+                                          className="text-red-600 hover:text-red-800 text-xs sm:text-sm"
                                           title="Eliminar usuario y empleado"
                                         >
                                           <Trash2 className="w-4 h-4" />

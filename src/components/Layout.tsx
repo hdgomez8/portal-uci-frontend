@@ -7,22 +7,25 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export const Layout: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-dark flex">
       {/* Sidebar */}
       <Sidebar 
         isCollapsed={isSidebarCollapsed} 
-        onToggleCollapse={setIsSidebarCollapsed} 
+        onToggleCollapse={setIsSidebarCollapsed}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
       />
       
       {/* Contenido principal */}
       <div className={`
         flex-1 transition-all duration-300 ease-in-out
-        ${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
+        lg:${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
       `}>
-        <Header />
-        <main className="p-6 min-h-screen">
+        <Header onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
+        <main className="p-4 sm:p-6 min-h-screen">
           <Outlet />
         </main>
       </div>

@@ -220,23 +220,23 @@ const Dashboard = () => {
           return (
             <div className="space-y-6">
               {/* Tarjetas de estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-blue-900 to-blue-800">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-blue-500/20 rounded-lg">
-                      <Calendar className="w-6 h-6 text-blue-400" />
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="p-2 sm:p-3 bg-blue-500/20 rounded-lg">
+                      <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-400">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm text-gray-400 truncate">
                         {isEmpleado ? 'Mis Permisos' : 'Total Permisos'}
                       </p>
-                      <p className="text-2xl font-bold text-white">{permisosStats.totalPermisos}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-white">{permisosStats.totalPermisos}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="card bg-gradient-to-br from-yellow-900 to-yellow-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-yellow-500/20 rounded-lg">
                       <Clock className="w-6 h-6 text-yellow-400" />
                     </div>
@@ -248,7 +248,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-green-900 to-green-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-green-500/20 rounded-lg">
                       <CheckCircle2 className="w-6 h-6 text-green-400" />
                     </div>
@@ -260,7 +260,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-red-900 to-red-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-red-500/20 rounded-lg">
                       <AlertTriangle className="w-6 h-6 text-red-400" />
                     </div>
@@ -334,9 +334,9 @@ const Dashboard = () => {
           return (
             <div className="space-y-6">
               {/* Tarjetas de estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-green-900 to-green-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-green-500/20 rounded-lg">
                       <Calendar className="w-6 h-6 text-green-400" />
                     </div>
@@ -350,7 +350,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-yellow-900 to-yellow-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-yellow-500/20 rounded-lg">
                       <Clock className="w-6 h-6 text-yellow-400" />
                     </div>
@@ -362,7 +362,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-blue-900 to-blue-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-blue-500/20 rounded-lg">
                       <CheckCircle2 className="w-6 h-6 text-blue-400" />
                     </div>
@@ -374,7 +374,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-red-900 to-red-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-red-500/20 rounded-lg">
                       <AlertTriangle className="w-6 h-6 text-red-400" />
                     </div>
@@ -387,7 +387,7 @@ const Dashboard = () => {
               </div>
 
               {/* Estadísticas adicionales */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-cyan-500/10 to-cyan-600/10">
                   <div className="flex items-center justify-between">
                     <div>
@@ -472,9 +472,9 @@ const Dashboard = () => {
           return (
             <div className="space-y-6">
               {/* Tarjetas de estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-purple-900 to-purple-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-purple-500/20 rounded-lg">
                       <DollarSign className="w-6 h-6 text-purple-400" />
                     </div>
@@ -488,7 +488,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-yellow-900 to-yellow-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-yellow-500/20 rounded-lg">
                       <Clock className="w-6 h-6 text-yellow-400" />
                     </div>
@@ -500,7 +500,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-green-900 to-green-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-green-500/20 rounded-lg">
                       <CheckCircle2 className="w-6 h-6 text-green-400" />
                     </div>
@@ -512,7 +512,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-red-900 to-red-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-red-500/20 rounded-lg">
                       <AlertTriangle className="w-6 h-6 text-red-400" />
                     </div>
@@ -525,7 +525,7 @@ const Dashboard = () => {
               </div>
 
               {/* Estadísticas adicionales */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-cyan-500/10 to-cyan-600/10">
                   <div className="flex items-center justify-between">
                     <div>
@@ -619,9 +619,9 @@ const Dashboard = () => {
           return (
             <div className="space-y-6">
               {/* Tarjetas de estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-indigo-900 to-indigo-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-indigo-500/20 rounded-lg">
                       <Clock className="w-6 h-6 text-indigo-400" />
                     </div>
@@ -635,7 +635,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-yellow-900 to-yellow-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-yellow-500/20 rounded-lg">
                       <Clock className="w-6 h-6 text-yellow-400" />
                     </div>
@@ -647,7 +647,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-green-900 to-green-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-green-500/20 rounded-lg">
                       <CheckCircle2 className="w-6 h-6 text-green-400" />
                     </div>
@@ -659,7 +659,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="card bg-gradient-to-br from-red-900 to-red-800">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
                     <div className="p-3 bg-red-500/20 rounded-lg">
                       <AlertTriangle className="w-6 h-6 text-red-400" />
                     </div>
@@ -672,7 +672,7 @@ const Dashboard = () => {
               </div>
 
               {/* Estadísticas adicionales */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="card bg-gradient-to-br from-blue-500/10 to-blue-600/10">
                   <div className="flex items-center justify-between">
                     <div>
@@ -780,12 +780,12 @@ const Dashboard = () => {
       case 'general':
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {statsCards.map((stat) => {
                 const Icon = stat.icon;
                 return (
                   <div key={stat.title} className="card bg-gradient-to-br from-gray-900 to-gray-800">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
                       <div className={`p-3 bg-${stat.color}-500/20 rounded-lg`}>
                         <Icon className={`w-6 h-6 text-${stat.color}-400`} />
                       </div>
@@ -832,7 +832,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="card">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Clock className="w-5 h-5" />
@@ -922,7 +922,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="card bg-gradient-to-br from-cyan-500/10 to-cyan-600/10">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1004,7 +1004,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="card">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <UserMinus className="w-5 h-5" />

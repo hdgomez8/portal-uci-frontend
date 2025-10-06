@@ -32,9 +32,11 @@ const menuItems = [
 interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: (collapsed: boolean) => void;
+  isMobileOpen?: boolean;
+  onMobileToggle?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileToggle }) => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -61,27 +63,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   };
 
   return (
-    <div className={`
-      fixed top-0 left-0 h-full bg-white dark:bg-gray-900 
-      shadow-lg transition-all duration-300 ease-in-out z-50
-      ${isCollapsed ? 'w-20' : 'w-64'}
-    `}>
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onMobileToggle}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed top-0 left-0 h-full bg-white dark:bg-gray-900 
+        shadow-lg transition-all duration-300 ease-in-out z-50
+        lg:translate-x-0 lg:static lg:inset-0
+        ${isCollapsed ? 'w-20' : 'w-64'}
+        ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
       <div className="flex items-center justify-between p-4 border-b dark:border-gray-800">
         {!isCollapsed && (
           <h1 className="text-xl font-bold text-[#2E7D32] dark:bg-gradient-to-r dark:from-[#2E7D32] dark:to-[#4CAF50] dark:bg-clip-text dark:text-transparent">
             RRHH
           </h1>
         )}
-        <button
-          onClick={() => onToggleCollapse(!isCollapsed)}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          {isCollapsed ? (
-            <Menu className="w-6 h-6" />
-          ) : (
+        <div className="flex items-center space-x-2">
+          {/* Mobile Close Button */}
+          <button
+            onClick={onMobileToggle}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
             <X className="w-6 h-6" />
-          )}
-        </button>
+          </button>
+          
+          {/* Desktop Toggle Button */}
+          <button
+            onClick={() => onToggleCollapse(!isCollapsed)}
+            className="hidden lg:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            {isCollapsed ? (
+              <Menu className="w-6 h-6" />
+            ) : (
+              <X className="w-6 h-6" />
+            )}
+          </button>
+        </div>
       </div>
 
       <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
@@ -89,6 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <NavLink
             key={path}
             to={path}
+            onClick={onMobileToggle} // Cerrar menú móvil al navegar
             className={({ isActive }) => `
               flex items-center space-x-3 p-3 rounded-lg transition-colors
               ${isActive 
@@ -97,8 +123,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               }
             `}
           >
-            <Icon className="w-6 h-6" />
-            {!isCollapsed && <span>{label}</span>}
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+            {!isCollapsed && <span className="text-sm sm:text-base">{label}</span>}
           </NavLink>
         ))}
       </nav>
@@ -179,6 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
