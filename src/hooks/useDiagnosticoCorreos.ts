@@ -119,14 +119,21 @@ export const useDiagnosticoCorreos = () => {
           detailedMessage += `\n\nSugerencias:\n${data.suggestions.map(s => `• ${s}`).join('\n')}`;
         }
         
-        setMensaje(detailedMessage);
-        setTipoMensaje('warning');
+      setMensaje(detailedMessage);
+      setTipoMensaje('warning');
       } else {
         setMensaje('📧 Procesando envío de correo de prueba...');
         setTipoMensaje('info');
       }
       
       setEstado(data);
+      
+      // Si hay advertencias, obtener logs detallados
+      if (data.status === 'warning') {
+        console.log('⚠️ Obteniendo logs detallados para advertencias...');
+        await obtenerLogsDetallados();
+      }
+      
       return data;
     } catch (error) {
       console.error('❌ Error ejecutando diagnóstico:', error);
@@ -162,6 +169,41 @@ export const useDiagnosticoCorreos = () => {
     }
   };
 
+  const obtenerLogsDetallados = async () => {
+    try {
+      console.log('📋 Obteniendo logs detallados del diagnóstico...');
+      const response = await fetch('/api/diagnostico/logs');
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('📊 Logs del diagnóstico:', data);
+      
+      // Mostrar información detallada
+      if (data.logs) {
+        console.log('📋 Logs del sistema:');
+        data.logs.forEach((log: any, index: number) => {
+          console.log(`${index + 1}. [${log.level.toUpperCase()}] ${log.message}`);
+        });
+      }
+      
+      if (data.variables) {
+        console.log('🔧 Variables de entorno:');
+        console.log(`   Configuradas: ${data.variables.configuradas}/${data.variables.total}`);
+        data.variables.detalles.forEach((variable: any) => {
+          console.log(`   ${variable.variable}: ${variable.configurada ? '✅' : '❌'} ${variable.valor}`);
+        });
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Error obteniendo logs:', error);
+      return null;
+    }
+  };
+
   // Auto-actualización cada 1.5 segundos si está ejecutando (más fluido)
   useEffect(() => {
     if (estado?.ejecutando) {
@@ -189,6 +231,7 @@ export const useDiagnosticoCorreos = () => {
     tipoMensaje,
     obtenerEstado,
     ejecutarDiagnostico,
-    resetearDiagnostico
+    resetearDiagnostico,
+    obtenerLogsDetallados
   };
 };

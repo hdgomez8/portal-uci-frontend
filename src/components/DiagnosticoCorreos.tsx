@@ -2,7 +2,7 @@ import React from 'react';
 import { useDiagnosticoCorreos } from '../hooks/useDiagnosticoCorreos';
 
 export const DiagnosticoCorreos: React.FC = () => {
-  const { estado, loading, mensaje, tipoMensaje, ejecutarDiagnostico, resetearDiagnostico } = useDiagnosticoCorreos();
+  const { estado, loading, mensaje, tipoMensaje, ejecutarDiagnostico, resetearDiagnostico, obtenerLogsDetallados } = useDiagnosticoCorreos();
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
@@ -108,6 +108,16 @@ export const DiagnosticoCorreos: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span>🔍</span>
                 <span>Diagnóstico Completo</span>
+              </div>
+            </button>
+            
+            <button
+              onClick={obtenerLogsDetallados}
+              className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              <div className="flex items-center space-x-2">
+                <span>📋</span>
+                <span>Ver Logs</span>
               </div>
             </button>
             
