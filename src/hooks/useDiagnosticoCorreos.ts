@@ -91,13 +91,13 @@ export const useDiagnosticoCorreos = () => {
     }
   };
 
-  // Auto-actualización cada 2 segundos si está ejecutando
+  // Auto-actualización cada 1.5 segundos si está ejecutando (más fluido)
   useEffect(() => {
     if (estado?.ejecutando) {
       console.log('⏳ Diagnóstico en ejecución, iniciando auto-actualización...');
       const interval = setInterval(() => {
         obtenerEstado();
-      }, 2000);
+      }, 1500); // Reducido a 1.5 segundos para mayor fluidez
       
       return () => {
         console.log('🛑 Deteniendo auto-actualización del diagnóstico');
