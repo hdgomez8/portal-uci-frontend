@@ -184,8 +184,8 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       console.log('🕐 Timestamp respuesta:', new Date().toISOString());
       
       console.log('✅ Usuario creado exitosamente en la base de datos');
-      console.log('🆔 ID del usuario creado:', response.data?.id);
-      console.log('📧 Email del usuario creado:', response.data?.email);
+      console.log('🆔 ID del usuario creado:', response.data?.usuario?.id);
+      console.log('📧 Email del usuario creado:', response.data?.usuario?.email);
       console.log('🔍 Todos los campos disponibles en la respuesta:', Object.keys(response.data || {}));
       
       // 🔍 VERIFICAR ESTADO DEL DIAGNÓSTICO DE CORREOS
@@ -198,6 +198,7 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
         setSuccess('Usuario creado y correo enviado exitosamente');
       } else {
         console.warn('⚠️ No se confirmó el envío del correo');
+        console.log('🔍 Verificando si el correo se envió a través del diagnóstico...');
         setSuccess('Usuario creado, pero verifica el estado del correo');
       }
       
