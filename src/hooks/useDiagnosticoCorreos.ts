@@ -62,6 +62,24 @@ export const useDiagnosticoCorreos = () => {
       
       const data = await response.json();
       console.log('📊 Diagnóstico iniciado:', data);
+      console.log('🔍 Estado del diagnóstico:', data.status);
+      console.log('🔍 Resultado:', data.resultado);
+      console.log('🔍 Mensaje:', data.message);
+      console.log('🔍 Timestamp:', data.timestamp);
+      
+      // Debugging adicional para Gmail API
+      if (data.details) {
+        console.log('🔍 Detalles del diagnóstico:', data.details);
+      }
+      if (data.errors) {
+        console.log('❌ Errores específicos:', data.errors);
+      }
+      if (data.warnings) {
+        console.log('⚠️ Advertencias específicas:', data.warnings);
+      }
+      if (data.gmailStatus) {
+        console.log('📧 Estado de Gmail API:', data.gmailStatus);
+      }
       
       // Mostrar feedback visual basado en la respuesta
       if (data.status === 'success') {
@@ -70,6 +88,10 @@ export const useDiagnosticoCorreos = () => {
       } else if (data.status === 'error') {
         setMensaje(`❌ Error enviando correo: ${data.message || 'Error desconocido'}`);
         setTipoMensaje('error');
+      } else if (data.status === 'warning') {
+        const warningMessage = data.message || 'Revisa la configuración del sistema';
+        setMensaje(`⚠️ Gmail API configurado pero con advertencias: ${warningMessage}`);
+        setTipoMensaje('warning');
       } else {
         setMensaje('📧 Procesando envío de correo de prueba...');
         setTipoMensaje('info');
