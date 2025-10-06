@@ -68,6 +68,9 @@ export const useDiagnosticoCorreos = () => {
       console.log('🔍 Timestamp:', data.timestamp);
       
       // Debugging adicional para Gmail API
+      console.log('🔍 ===== DEBUGGING COMPLETO DEL DIAGNÓSTICO =====');
+      console.log('🔍 Estructura completa de la respuesta:', JSON.stringify(data, null, 2));
+      
       if (data.details) {
         console.log('🔍 Detalles del diagnóstico:', data.details);
       }
@@ -80,6 +83,19 @@ export const useDiagnosticoCorreos = () => {
       if (data.gmailStatus) {
         console.log('📧 Estado de Gmail API:', data.gmailStatus);
       }
+      if (data.steps) {
+        console.log('📋 Pasos del diagnóstico:', data.steps);
+      }
+      if (data.problems) {
+        console.log('🚨 Problemas identificados:', data.problems);
+      }
+      if (data.suggestions) {
+        console.log('💡 Sugerencias:', data.suggestions);
+      }
+      
+      // Mostrar todas las propiedades disponibles
+      console.log('🔍 Propiedades disponibles en la respuesta:', Object.keys(data));
+      console.log('🔍 ===== FIN DEBUGGING COMPLETO =====');
       
       // Mostrar feedback visual basado en la respuesta
       if (data.status === 'success') {
@@ -90,7 +106,20 @@ export const useDiagnosticoCorreos = () => {
         setTipoMensaje('error');
       } else if (data.status === 'warning') {
         const warningMessage = data.message || 'Revisa la configuración del sistema';
-        setMensaje(`⚠️ Gmail API configurado pero con advertencias: ${warningMessage}`);
+        let detailedMessage = `⚠️ Gmail API configurado pero con advertencias: ${warningMessage}`;
+        
+        // Agregar detalles específicos si están disponibles
+        if (data.warnings && Array.isArray(data.warnings)) {
+          detailedMessage += `\n\nAdvertencias específicas:\n${data.warnings.map(w => `• ${w}`).join('\n')}`;
+        }
+        if (data.problems && Array.isArray(data.problems)) {
+          detailedMessage += `\n\nProblemas identificados:\n${data.problems.map(p => `• ${p}`).join('\n')}`;
+        }
+        if (data.suggestions && Array.isArray(data.suggestions)) {
+          detailedMessage += `\n\nSugerencias:\n${data.suggestions.map(s => `• ${s}`).join('\n')}`;
+        }
+        
+        setMensaje(detailedMessage);
         setTipoMensaje('warning');
       } else {
         setMensaje('📧 Procesando envío de correo de prueba...');
