@@ -642,7 +642,7 @@ const VacacionesPage = () => {
       {activeTab === "resumen" && (
         <div className="space-y-6">
           {/* Tarjetas de estadísticas principales */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="card bg-gradient-to-br from-green-900 to-green-800">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-green-500/20 rounded-lg">
@@ -695,7 +695,7 @@ const VacacionesPage = () => {
           </div>
 
           {/* Estadísticas adicionales */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="card bg-gradient-to-br from-cyan-500/10 to-cyan-600/10">
               <div className="flex items-center justify-between">
                 <div>
@@ -739,7 +739,7 @@ const VacacionesPage = () => {
           </div>
 
           {/* Distribución por estado */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="card">
               <h2 className="text-xl font-semibold mb-4">Distribución por Estado</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -845,7 +845,7 @@ const VacacionesPage = () => {
 
           {/* Resumen de acciones pendientes para jefes */}
           {user?.roles?.some((rol) => rol.nombre === 'JEFE AREA') && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {enRevision.length > 0 && (
                 <div className="card bg-yellow-50 border border-yellow-200">
                   <div className="flex items-center space-x-3 mb-4">
@@ -894,7 +894,7 @@ const VacacionesPage = () => {
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full min-w-[800px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solicitante</th>
@@ -962,7 +962,7 @@ const VacacionesPage = () => {
           {enRevision.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solicitante</th>
@@ -1056,7 +1056,7 @@ const VacacionesPage = () => {
           {enRevisionAdministracion.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solicitante</th>
@@ -1150,7 +1150,7 @@ const VacacionesPage = () => {
           {enRevisionRRHH.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solicitante</th>
@@ -1244,7 +1244,7 @@ const VacacionesPage = () => {
           {enRevision.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
@@ -1343,7 +1343,7 @@ const VacacionesPage = () => {
           {enRevision.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
@@ -1612,7 +1612,7 @@ const VacacionesPage = () => {
               
               <form onSubmit={crearSolicitudVacaciones} className="space-y-6">
                 {/* Información básica */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Ciudad/Departamento *
@@ -1641,7 +1641,7 @@ const VacacionesPage = () => {
                 </div>
 
                 {/* Información del colaborador */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nombres del Colaborador *
@@ -1687,7 +1687,7 @@ const VacacionesPage = () => {
                 {/* Período cumplido */}
                 <div className="border-t pt-6">
                   <h4 className="text-md font-medium text-gray-900 mb-4">Período Cumplido</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Desde *
@@ -1734,7 +1734,7 @@ const VacacionesPage = () => {
                 {/* Período de disfrute */}
                 <div className="border-t pt-6">
                   <h4 className="text-md font-medium text-gray-900 mb-4">Período de Disfrute</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Desde *
@@ -1781,7 +1781,7 @@ const VacacionesPage = () => {
                 {/* Información del solicitante y jefe */}
                 <div className="border-t pt-6">
                   <h4 className="text-md font-medium text-gray-900 mb-4">Información del Solicitante y Jefe</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Nombre del Solicitante *

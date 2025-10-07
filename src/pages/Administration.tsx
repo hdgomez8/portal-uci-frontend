@@ -1093,24 +1093,24 @@ const Administration = () => {
 
                         <div className="overflow-x-auto -mx-2 sm:mx-0">
                           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <table className="w-full min-w-[600px] divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-800">
                               <tr>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombres</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Correo</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Roles</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Documento</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">Nombres</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell min-w-[180px]">Correo</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell min-w-[120px]">Roles</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Acciones</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                               {usuariosPaginados.length > 0 ? (
                                 usuariosPaginados.map((user) => (
                                   <tr key={user.id}>
-                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap w-24">
                                       <div className="text-sm text-gray-500 dark:text-gray-400">{user.empleado.documento}</div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 min-w-[200px]">
                                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                                         <div className="flex items-center gap-2">
                                           {user.empleado.nombres}
@@ -1137,10 +1137,10 @@ const Administration = () => {
                                         </div>
                                       </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell min-w-[180px]">
                                       <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell min-w-[120px]">
                                       <div className="flex flex-wrap gap-1">
                                         {user.roles.map((rol, index) => (
                                           <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -1149,7 +1149,7 @@ const Administration = () => {
                                         ))}
                                       </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 w-32">
                                       <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
                                         <button onClick={() => openEditModal(user)} className="text-primary hover:text-primary/80 text-xs sm:text-sm">
                                           Editar

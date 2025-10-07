@@ -627,7 +627,7 @@ const Permissions = () => {
       {activeTab === "resumen" ? (
         <div className="space-y-6">
           {/* Tarjetas de estadísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="card bg-gradient-to-br from-blue-900 to-blue-800">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-500/20 rounded-lg">
@@ -880,7 +880,7 @@ const Permissions = () => {
 
           {/* Tabla de permisos */}
           <div className="overflow-x-auto mt-6">
-            <table className="min-w-full bg-white shadow-lg rounded-xl border border-gray-200">
+            <table className="w-full min-w-[900px] bg-white shadow-lg rounded-xl border border-gray-200">
               <thead className="bg-blue-600">
                 <tr>
                   <th 
@@ -1069,7 +1069,7 @@ const Permissions = () => {
 
             <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
               {/* Primera fila: Nombre empleado, Cargo, Área, Jefe Inmediato */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <input type="hidden" name="empleado_id" value={newPermission.empleado_id} />
 
                 <div>
@@ -1120,7 +1120,7 @@ const Permissions = () => {
               </div>
 
               {/* Segunda fila: Fecha solicitud, Fecha permiso, Hora permiso, Duración permiso */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-[#2E7D32] dark:text-[#4CAF50]">Fecha Solicitud</label>
                   <input

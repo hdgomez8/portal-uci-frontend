@@ -411,7 +411,7 @@ const CesantiasPage = () => {
       {activeTab === "resumen" ? (
         <div className="space-y-6">
           {/* Tarjetas de estadísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="card bg-gradient-to-br from-blue-900 to-blue-800">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-500/20 rounded-lg">
@@ -462,7 +462,7 @@ const CesantiasPage = () => {
           </div>
 
           {/* Estadísticas adicionales */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="card">
               <h2 className="text-xl font-semibold mb-4">Monto Total Solicitado</h2>
               <div className="text-center">
@@ -490,7 +490,7 @@ const CesantiasPage = () => {
 
           {/* Gráfico de tipos de retiro */}
           {estadisticas.totalCesantias > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="card">
                 <h2 className="text-xl font-semibold mb-4">Distribución por Estado</h2>
                 <div className="grid grid-cols-2 gap-4">
@@ -626,7 +626,8 @@ const CesantiasPage = () => {
 
           {/* Tabla de solicitudes */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px] divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -734,7 +735,8 @@ const CesantiasPage = () => {
                   </tr>
                 )}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
 
           {/* Paginación */}
@@ -817,7 +819,7 @@ const CesantiasPage = () => {
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Información Personal</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Nombre del colaborador *
@@ -876,7 +878,7 @@ const CesantiasPage = () => {
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Detalles de la Solicitud</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Fecha de solicitud *
@@ -911,7 +913,7 @@ const CesantiasPage = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Tipo de retiro *
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <label className="flex items-center p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors">
                       <input
                         type="radio"
@@ -945,7 +947,7 @@ const CesantiasPage = () => {
                 {formData.tipo_retiro === 'consignacion_cuenta' && (
                   <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-4">Información Bancaria</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Entidad bancaria *
@@ -999,7 +1001,7 @@ const CesantiasPage = () => {
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Documentos Requeridos</h3>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {/* Documento 1 */}
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

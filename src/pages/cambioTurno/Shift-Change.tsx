@@ -923,7 +923,7 @@ const ShiftChange = () => {
           )}
           
           {/* Tarjetas de estadísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="card bg-gradient-to-br from-blue-900 to-blue-800">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-500/20 rounded-lg">
@@ -976,7 +976,7 @@ const ShiftChange = () => {
           </div>
 
           {/* Estadísticas adicionales */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="card">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="p-2 bg-orange-100 rounded-lg">
@@ -1019,7 +1019,7 @@ const ShiftChange = () => {
 
           {/* Gráfico de estados */}
           {estadisticas.totalCambios > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div className="card">
                 <h2 className="text-xl font-semibold mb-4">Distribución por Estado</h2>
                 <div className="grid grid-cols-2 gap-4">
@@ -1117,7 +1117,7 @@ const ShiftChange = () => {
                   </button>
                 </div>
                 <form onSubmit={manejarCambioTurno} className="p-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Fecha Solicitud</label>
                       <input type="date" className="input mt-1" value={fechaSolicitud} onChange={e => setFechaSolicitud(e.target.value)} required readOnly />
@@ -1414,7 +1414,8 @@ const ShiftChange = () => {
 
           {/* Tabla de solicitudes */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px] divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1471,7 +1472,8 @@ const ShiftChange = () => {
                   </tr>
                 )}
               </tbody>
-            </table>
+                </table>
+              </div>
           </div>
 
           {/* Paginación */}
@@ -1538,7 +1540,8 @@ const ShiftChange = () => {
           
           {pendientesVistoBueno.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1593,7 +1596,8 @@ const ShiftChange = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </div>
           ) : (
             <div className="text-center py-8 text-gray-400">
@@ -1622,7 +1626,8 @@ const ShiftChange = () => {
           
           {enRevision.length > 0 ? (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1678,7 +1683,8 @@ const ShiftChange = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </div>
             </div>
           ) : (
             <div className="text-center py-8 text-gray-400">

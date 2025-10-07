@@ -877,7 +877,7 @@ const Dashboard = () => {
                 <button className="btn-primary">Nueva Solicitud</button>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <table className="w-full min-w-[600px] divide-y divide-gray-200 dark:divide-gray-700">
                   <thead>
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -963,7 +963,7 @@ const Dashboard = () => {
                 <button className="btn-primary">Gestionar Contratos</button>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <table className="w-full min-w-[600px] divide-y divide-gray-200 dark:divide-gray-700">
                   <thead>
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
