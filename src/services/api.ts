@@ -51,6 +51,35 @@ api.interceptors.response.use(
     console.log('🕐 Timestamp:', new Date().toISOString());
     console.log('🔍 ===== END ERROR DEBUG =====');
     
+    // 🚨 MANEJO DE TOKEN EXPIRADO
+    if (error.response?.status === 400 || error.response?.status === 401) {
+      console.log('🔐 Token expirado o inválido detectado');
+      console.log('📝 Error data:', error.response?.data);
+      
+      // Verificar si es un error de autenticación específico
+      const errorData = error.response?.data;
+      const isAuthError = errorData?.message?.includes('token') || 
+                         errorData?.message?.includes('expired') ||
+                         errorData?.message?.includes('invalid') ||
+                         error.response?.status === 401;
+      
+      if (isAuthError) {
+        console.log('🔐 Error de autenticación confirmado');
+        
+        // Limpiar datos de sesión
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Mostrar mensaje al usuario
+        console.warn('⚠️ Tu sesión ha expirado. Serás redirigido al login.');
+        
+        // Redirigir al login después de un breve delay
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1000);
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
