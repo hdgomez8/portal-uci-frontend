@@ -5,7 +5,6 @@ import { permisosSistemaService } from '../services/apiPermisos';
 import { estructuraService } from '../services/apiEstructura';
 import CreateUserEmployeeModal from '../components/CreateUserEmployeeModal';
 import PermissionDeniedAlert from '../components/PermissionDeniedAlert';
-import { DiagnosticoCorreos } from '../components/DiagnosticoCorreos';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { exportUsuariosToExcel, exportDepartamentosToExcel, exportAreasToExcel } from '../utils/excelExport';
@@ -997,9 +996,9 @@ const Administration = () => {
                 </div>
               )}
 
-              {/* Filtros */}
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Filtros Responsive */}
+              <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Nombre
@@ -1011,7 +1010,7 @@ const Administration = () => {
                         setFiltros({ ...filtros, nombre: e.target.value });
                         setPaginaActual(1);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Buscar por nombre..."
                     />
                   </div>
@@ -1026,7 +1025,7 @@ const Administration = () => {
                         setFiltros({ ...filtros, documento: e.target.value });
                         setPaginaActual(1);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Buscar por documento..."
                     />
                   </div>
@@ -1041,7 +1040,7 @@ const Administration = () => {
                         setFiltros({ ...filtros, email: e.target.value });
                         setPaginaActual(1);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Buscar por email..."
                     />
                   </div>
@@ -1056,15 +1055,15 @@ const Administration = () => {
                         setFiltros({ ...filtros, rol: e.target.value });
                         setPaginaActual(1);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Buscar por rol..."
                     />
                   </div>
                 </div>
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-center sm:justify-end">
                   <button
                     onClick={limpiarFiltros}
-                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-200 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     Limpiar Filtros
                   </button>
@@ -1086,14 +1085,15 @@ const Administration = () => {
                     
                     return (
                       <>
-                        <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                          <span>
+                        <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          <span className="mb-2 sm:mb-0">
                             Mostrando {indiceInicio + 1} a {Math.min(indiceInicio + elementosPorPagina, usuariosFiltrados.length)} de {usuariosFiltrados.length} usuarios
                           </span>
                         </div>
 
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <div className="overflow-x-auto -mx-2 sm:mx-0">
+                          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-800">
                               <tr>
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
@@ -1174,26 +1174,27 @@ const Administration = () => {
                               )}
                             </tbody>
                           </table>
+                          </div>
                         </div>
 
-                        {/* Paginación */}
+                        {/* Paginación Responsive */}
                         {totalPaginas > 1 && (
-                          <div className="flex justify-center items-center gap-2 mt-6">
+                          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4 sm:mt-6">
                             <button
                               onClick={() => setPaginaActual(paginaActual - 1)}
                               disabled={paginaActual === 1}
-                              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                              className="w-full sm:w-auto px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                             >
                               Anterior
                             </button>
                             
                             {/* Números de página */}
-                            <div className="flex gap-1">
+                            <div className="flex flex-wrap justify-center gap-1">
                               {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
                                 <button
                                   key={pagina}
                                   onClick={() => setPaginaActual(pagina)}
-                                  className={`px-3 py-2 rounded-lg transition-colors ${
+                                  className={`px-2 sm:px-3 py-2 text-xs sm:text-sm rounded-lg transition-colors ${
                                     pagina === paginaActual
                                       ? 'bg-[#2E7D32] text-white'
                                       : 'bg-gray-200 text-[#2E7D32] hover:bg-gray-300 dark:bg-gray-700 dark:text-[#4CAF50] dark:hover:bg-gray-600'
@@ -1207,7 +1208,7 @@ const Administration = () => {
                             <button
                               onClick={() => setPaginaActual(paginaActual + 1)}
                               disabled={paginaActual === totalPaginas}
-                              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                              className="w-full sm:w-auto px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                             >
                               Siguiente
                             </button>
@@ -1221,12 +1222,6 @@ const Administration = () => {
             </div>
           )}
           
-          {/* Componente de Diagnóstico de Correos */}
-          {adminActiveTab === 'users' && (
-            <div className="mt-8">
-              <DiagnosticoCorreos />
-            </div>
-          )}
           
           {adminActiveTab === 'roles' && (
             <RolesPermisosAdmin />

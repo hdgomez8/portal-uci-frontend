@@ -188,9 +188,6 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       console.log('📧 Email del usuario creado:', response.data?.usuario?.email);
       console.log('🔍 Todos los campos disponibles en la respuesta:', Object.keys(response.data || {}));
       
-      // 🔍 VERIFICAR ESTADO DEL DIAGNÓSTICO DE CORREOS
-      console.log('🔍 Verificando estado del diagnóstico de correos...');
-      await verificarDiagnosticoCorreos();
       
       // Verificar si hay información sobre el correo
       if (response.data?.emailSent) {
@@ -229,9 +226,6 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
       console.error('📝 Mensaje del error:', err.response?.data?.message);
       console.error('🔍 Detalles del error:', err.response?.data);
       
-      // 🔍 VERIFICAR DIAGNÓSTICO EN CASO DE ERROR
-      console.log('🔍 Verificando diagnóstico de correos debido al error...');
-      await verificarDiagnosticoCorreos();
       
       const errorMessage = err.response?.data?.message || 'Error al crear el usuario';
       setError(errorMessage);
@@ -241,54 +235,6 @@ const CreateUserEmployeeModal: React.FC<CreateUserEmployeeModalProps> = ({
     }
   };
 
-  // 🔍 FUNCIÓN PARA VERIFICAR DIAGNÓSTICO DE CORREOS
-  const verificarDiagnosticoCorreos = async () => {
-    try {
-      console.log('🔍 Consultando estado del diagnóstico de correos...');
-      const response = await fetch('/api/diagnostico/estado');
-      
-      console.log('📊 Status de la respuesta del diagnóstico:', response.status);
-      console.log('📊 Headers de la respuesta del diagnóstico:', response.headers);
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-      
-      const diagnostico = await response.json();
-      
-      console.log('📊 Estado del diagnóstico:', diagnostico);
-      console.log('🔍 Estructura completa del diagnóstico:', JSON.stringify(diagnostico, null, 2));
-      console.log('🔍 Tipo de datos del diagnóstico:', typeof diagnostico);
-      console.log('🔍 Es array?', Array.isArray(diagnostico));
-      console.log('🔍 Es objeto?', typeof diagnostico === 'object' && diagnostico !== null);
-      
-      if (diagnostico.ejecutando) {
-        console.log('⏳ Diagnóstico en ejecución...');
-      } else if (diagnostico.resultado === 'exitoso') {
-        console.log('✅ Diagnóstico completado exitosamente');
-        console.log('📋 Pasos ejecutados:', diagnostico.pasos?.length || 0);
-      } else if (diagnostico.resultado === 'error') {
-        console.log('❌ Diagnóstico falló');
-        console.log('🔍 Último error:', diagnostico.error);
-      } else {
-        console.log('ℹ️ Diagnóstico no ejecutado aún');
-        console.log('🔍 Estado actual:', diagnostico.ejecutando ? 'ejecutando' : 'no ejecutando');
-      }
-      
-      // Mostrar pasos recientes
-      if (diagnostico.pasos && diagnostico.pasos.length > 0) {
-        const pasosRecientes = diagnostico.pasos.slice(-3);
-        console.log('📋 Últimos pasos del diagnóstico:', pasosRecientes);
-      } else {
-        console.log('📋 No hay pasos de diagnóstico disponibles');
-      }
-      
-    } catch (error) {
-      console.error('❌ Error consultando diagnóstico:', error);
-      console.error('🔍 Detalles del error:', error.message);
-      console.error('🔍 Stack trace:', error.stack);
-    }
-  };
 
   // Filtrar áreas por departamento seleccionado
   const areasFiltradas = areas.filter(area => 
