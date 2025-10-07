@@ -10,7 +10,7 @@ export const Layout: React.FC = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark flex">
+    <div className="min-h-screen bg-gray-100 dark:bg-dark flex overflow-x-hidden">
       {/* Sidebar */}
       <Sidebar 
         isCollapsed={isSidebarCollapsed} 
@@ -21,11 +21,11 @@ export const Layout: React.FC = () => {
       
       {/* Contenido principal */}
       <div className={`
-        flex-1 transition-all duration-300 ease-in-out
+        flex-1 transition-all duration-300 ease-in-out overflow-x-auto
         lg:${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
       `}>
         <Header onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} />
-        <main className="p-4 sm:p-6 min-h-screen">
+        <main className="p-4 sm:p-6 min-h-screen w-full max-w-full">
           <Outlet />
         </main>
       </div>

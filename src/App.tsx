@@ -19,14 +19,15 @@ const Profile = React.lazy(() => import('./pages/Profile'));
 
 function App() {
   return (
-    <Provider store={store}>
-        <Router>
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          }>
-            <Routes>
+    <div className="w-full max-w-full overflow-x-hidden">
+      <Provider store={store}>
+          <Router>
+            <Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+              </div>
+            }>
+              <Routes>
               <Route path="/login" element={<Login />} />
               <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
@@ -43,10 +44,11 @@ function App() {
                 </Route>
               </Route>
               <Route path="*" element={<Login />} />
-            </Routes>
-          </Suspense>
-        </Router>
-    </Provider>
+              </Routes>
+            </Suspense>
+          </Router>
+      </Provider>
+    </div>
   );
 }
 
