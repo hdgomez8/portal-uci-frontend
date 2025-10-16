@@ -271,11 +271,7 @@ export const solicitudesService = {
   getSolicitudes: () => api.get('/solicitudes'),
   getSolicitudesPorEmpleado: (empleadoId: string) => api.get(`/solicitudes/empleado/${empleadoId}`),
   getSolicitudesPorJefe: (jefeId: string) => api.get(`/solicitudes/jefe/${jefeId}`),
-  crearSolicitud: (solicitudData: FormData) => api.post('/solicitudes', solicitudData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  }),
+  crearSolicitud: (solicitudData: FormData) => api.post('/solicitudes', solicitudData),
   actualizarEstadoSolicitud: (id: string, estado: string, motivo?: string) => 
     api.put(`/solicitudes/${id}/estado`, { estado, motivo }),
   descargarPDF: (id: string) => api.get(`/solicitudes/${id}/pdf`, { responseType: 'blob' }),
