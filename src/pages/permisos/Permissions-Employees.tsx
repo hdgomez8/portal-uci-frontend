@@ -1008,8 +1008,8 @@ const Permissions = () => {
                     key={pagina}
                     onClick={() => setPaginaActual(pagina)}
                     className={`px-3 py-2 rounded-lg transition-colors ${pagina === paginaActual
-                        ? 'bg-[#2E7D32] text-white'
-                        : 'bg-gray-200 text-[#2E7D32] hover:bg-gray-300 dark:bg-gray-700 dark:text-[#4CAF50] dark:hover:bg-gray-600'
+                      ? 'bg-[#2E7D32] text-white'
+                      : 'bg-gray-200 text-[#2E7D32] hover:bg-gray-300 dark:bg-gray-700 dark:text-[#4CAF50] dark:hover:bg-gray-600'
                       }`}
                   >
                     {pagina}
@@ -1259,26 +1259,18 @@ const Permissions = () => {
                     <p className="text-sm font-semibold text-gray-700 mb-3">📎 Archivos Adjuntos:</p>
                     <ul className="space-y-2">
                       {(selectedPermission.adjuntos || []).map((archivo: any, index: number) => {
-                        const rutaRel = normalizarRutaAdjunto(archivo.ruta_archivo);
-                        const url = buildAdjuntoUrl(rutaRel);
+                        const rutaRel = normalizarRutaAdjunto(archivo.ruta_archivo); // e.g. 'solicitudes/1760....pdf'
+                        const url = buildAdjuntoUrl(rutaRel);                        // https://cuidadocritico.com.co/uploads/solicitudes/...
+
                         return (
                           <li key={index} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md">
                             <div className="flex items-center space-x-3">
                               <span className="text-green-500 text-lg">{archivo.tipo_mime.includes("image") ? "🖼️" : "📄"}</span>
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-600 hover:underline truncate max-w-xs"
-                              >
+                              <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate max-w-xs">
                                 {archivo.nombre_archivo}
                               </a>
                             </div>
-                            <a
-                              href={url}
-                              download={archivo.nombre_archivo}
-                              className="ml-3 text-green-500 hover:text-green-700 transition"
-                            >
+                            <a href={url} download={archivo.nombre_archivo} className="ml-3 text-green-500 hover:text-green-700 transition">
                               ⬇️
                             </a>
                           </li>
