@@ -91,6 +91,19 @@ api.interceptors.response.use(
   }
 );
 
+// Helpers para URLs públicas
+export const getPublicBase = () =>
+  import.meta.env.VITE_PUBLIC_ORIGIN || window.location.origin;
+
+export const buildAdjuntoUrl = (rutaRelativa: string) =>
+  `${getPublicBase()}/uploads/${rutaRelativa}`;
+
+// Si a veces guardaste rutas absolutas de disco, normalízalas:
+export const normalizarRutaAdjunto = (rutaBD: string) => {
+  const idx = rutaBD.indexOf('/uploads/');
+  return idx >= 0 ? rutaBD.substring(idx + '/uploads/'.length) : rutaBD;
+};
+
 export const userService = {
   getUsers: () => api.get('/usuarios'),
 

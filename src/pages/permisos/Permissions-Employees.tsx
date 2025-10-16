@@ -8,6 +8,8 @@ import Loader from '../../components/Loader';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import PermisosPorTipoChart from '../../components/PermisosPorTipoChart';
 import { exportSolicitudesToExcel } from '../../utils/excelExport';
+import { buildAdjuntoUrl, normalizarRutaAdjunto } from '../../services/api';
+
 
 const EmployeeSummary = ({ empleado }: { empleado: any }) => (
   <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded flex items-center gap-6">
@@ -25,34 +27,34 @@ const EmployeeSummary = ({ empleado }: { empleado: any }) => (
 
 const Permissions = () => {
   const user = JSON.parse(localStorage.getItem("usuario") || "null");
-  
+
   // Función para obtener el área del usuario
   const obtenerAreaUsuario = () => {
     // La estructura correcta según el backend es: user.empleado.areas[0].nombre
     const area = user?.empleado?.areas?.[0]?.nombre || 'No asignada';
-    
+
     return area;
   };
-  
+
   // Función para obtener el jefe del usuario
   const obtenerJefeUsuario = () => {
     // La estructura correcta según el backend es: user.empleado.areas[0].jefe.nombres
     const jefe = user?.empleado?.areas?.[0]?.jefe?.nombres || 'No asignado';
-    
+
     return jefe;
   };
-  
+
   // Función para obtener la fecha local correcta
   const getCurrentDate = () => {
     const now = new Date();
-    
+
     // Ajustar por zona horaria local para evitar desfase
     const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
-    
+
     const year = localDate.getFullYear();
     const month = String(localDate.getMonth() + 1).padStart(2, '0');
     const day = String(localDate.getDate()).padStart(2, '0');
-    
+
     return `${year}-${month}-${day}`;
   };
 
@@ -76,14 +78,14 @@ const Permissions = () => {
     try {
       // Crear fecha en zona horaria local para evitar desfase
       const date = new Date(dateString);
-      
+
       // Ajustar por zona horaria local
       const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-      
+
       const year = localDate.getFullYear();
       const month = String(localDate.getMonth() + 1).padStart(2, '0');
       const day = String(localDate.getDate()).padStart(2, '0');
-      
+
       return `${day}/${month}/${year}`;
     } catch (error) {
       console.error('Error formateando fecha para tabla:', error);
@@ -106,13 +108,13 @@ const Permissions = () => {
   // Función para asegurar que la fecha se envíe correctamente
   const ensureCorrectDate = (dateString: string) => {
     if (!dateString) return '';
-    
+
     try {
       // Si ya está en formato YYYY-MM-DD, usarlo directamente
       if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
         return dateString;
       }
-      
+
       // Para otros formatos, crear fecha en zona horaria local
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -125,7 +127,7 @@ const Permissions = () => {
       return dateString;
     }
   };
-  
+
   const [permissions, setPermissions] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -157,7 +159,7 @@ const Permissions = () => {
     permisosPorEmpleado: [],
     permisosUltimosMeses: []
   });
-  
+
   // Estados para paginación y filtros
   const [paginaActual, setPaginaActual] = useState(1);
   const [elementosPorPagina] = useState(10);
@@ -245,19 +247,19 @@ const Permissions = () => {
   // Guardar permiso nuevo (simulación)
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    
+
     // Si se está editando un permiso existente, no hacer nada
     if (selectedPermission) {
       return;
     }
-    
+
     // Validar que la fecha del permiso no sea anterior a hoy
     const fechaActual = getCurrentDate();
     if (newPermission.fecha_permiso && newPermission.fecha_permiso < fechaActual) {
       setError('❌ La fecha del permiso no puede ser anterior a la fecha actual');
       return;
     }
-    
+
     // Asegurar que la fecha se envíe correctamente
     const fechaPermisoCorregida = ensureCorrectDate(newPermission.fecha_permiso);
 
@@ -285,7 +287,7 @@ const Permissions = () => {
 
       fetchPermissions();
       setSuccessMessage("✔️ Permiso creado con éxito");
-      setTimeout(() => setSuccessMessage(""), 5000);      
+      setTimeout(() => setSuccessMessage(""), 5000);
       setPermissions([...permissions, response]);
       setShowModal(false);
 
@@ -329,16 +331,16 @@ const Permissions = () => {
     return permisos.filter(permiso => {
       const cumpleEstado = !filtros.estado || permiso.estado === filtros.estado;
       const cumpleTipo = !filtros.tipoPermiso || permiso.tipo_solicitud?.nombre === filtros.tipoPermiso;
-      const cumpleEmpleado = !filtros.empleado || 
+      const cumpleEmpleado = !filtros.empleado ||
         permiso.empleado?.nombres?.toLowerCase().includes(filtros.empleado.toLowerCase());
-      
+
       let cumpleFecha = true;
       if (filtros.fechaDesde || filtros.fechaHasta) {
         const fechaPermiso = permiso.fecha_creacion ? new Date(permiso.fecha_creacion).toISOString().split('T')[0] : '';
         if (filtros.fechaDesde && fechaPermiso < filtros.fechaDesde) cumpleFecha = false;
         if (filtros.fechaHasta && fechaPermiso > filtros.fechaHasta) cumpleFecha = false;
       }
-      
+
       return cumpleEstado && cumpleTipo && cumpleEmpleado && cumpleFecha;
     });
   };
@@ -448,7 +450,7 @@ const Permissions = () => {
       }
       setTimeout(() => setSuccessMessage(""), 5000);
       fetchPermissions();
-      
+
       // Cerrar el modal después de la acción
       setShowModal(false);
       setSelectedPermission(null);
@@ -463,29 +465,29 @@ const Permissions = () => {
   const descargarPDF = async (permiso: any) => {
     try {
       const response = await solicitudesService.descargarPDF(permiso.id);
-      
+
       // Crear un blob con la respuesta
       const blob = new Blob([response.data], { type: 'application/pdf' });
-      
+
       // Crear URL del blob
       const url = window.URL.createObjectURL(blob);
-      
+
       // Crear elemento de descarga
       const link = document.createElement('a');
       link.href = url;
       link.download = `permiso_${permiso.id}.pdf`;
-      
+
       // Simular clic para descargar
       document.body.appendChild(link);
       link.click();
-      
+
       // Limpiar
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       setSuccessMessage('✅ PDF descargado exitosamente');
       setTimeout(() => setSuccessMessage(""), 3000);
-      
+
     } catch (error) {
       console.error('Error descargando PDF:', error);
       setError('Error al descargar el PDF');
@@ -510,7 +512,7 @@ const Permissions = () => {
       }));
 
       const success = exportSolicitudesToExcel(datosParaExportar, 'permisos');
-      
+
       if (success) {
         setSuccessMessage('✅ Permisos exportados a Excel exitosamente');
         setTimeout(() => setSuccessMessage(""), 5000);
@@ -525,7 +527,7 @@ const Permissions = () => {
 
   const obtenerIconoAccion = (permiso: any) => {
     const isJefe = user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA');
-    
+
     if (isJefe && permiso.estado === "pendiente") {
       return (
         <div className="flex gap-2">
@@ -554,7 +556,7 @@ const Permissions = () => {
         </div>
       );
     }
-    
+
     switch (permiso.estado) {
       case "pendiente":
         return <Pencil className="text-blue-500 cursor-pointer" onClick={() => manejarAccion(permiso)} />;
@@ -564,8 +566,8 @@ const Permissions = () => {
       case "aprobado":
         return (
           <div className="flex gap-2">
-            <FileText 
-              className="text-green-500 cursor-pointer" 
+            <FileText
+              className="text-green-500 cursor-pointer"
               onClick={() => manejarAccion(permiso)}
             />
             <button
@@ -635,8 +637,8 @@ const Permissions = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400">
-                    {user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA') 
-                      ? 'Total Permisos (Departamento)' 
+                    {user?.roles?.some((rol: any) => rol.nombre === 'JEFE AREA')
+                      ? 'Total Permisos (Departamento)'
                       : 'Mis Permisos'
                     }
                   </p>
@@ -725,7 +727,7 @@ const Permissions = () => {
               <div className="flex items-end justify-between h-32">
                 {permisosStats.permisosUltimosMeses.map((mes, index) => (
                   <div key={index} className="flex flex-col items-center">
-                    <div 
+                    <div
                       className="bg-blue-600 rounded-t w-8 mb-2"
                       style={{ height: `${Math.max(10, (mes.cantidad / Math.max(...permisosStats.permisosUltimosMeses.map(m => m.cantidad))) * 100)}px` }}
                     ></div>
@@ -883,7 +885,7 @@ const Permissions = () => {
             <table className="w-full min-w-[900px] bg-white shadow-lg rounded-xl border border-gray-200">
               <thead className="bg-blue-600">
                 <tr>
-                  <th 
+                  <th
                     className="px-4 py-3 text-white font-semibold text-center rounded-tl-xl cursor-pointer hover:bg-blue-700 transition-colors"
                     onClick={() => ordenarPorCampo('empleado')}
                   >
@@ -897,7 +899,7 @@ const Permissions = () => {
                     </div>
                   </th>
                   <th className="px-4 py-3 text-white font-semibold text-center">Cargo</th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-white font-semibold text-center cursor-pointer hover:bg-blue-700 transition-colors"
                     onClick={() => ordenarPorCampo('fecha_solicitud')}
                   >
@@ -910,7 +912,7 @@ const Permissions = () => {
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-white font-semibold text-center cursor-pointer hover:bg-blue-700 transition-colors"
                     onClick={() => ordenarPorCampo('fecha_permiso')}
                   >
@@ -923,7 +925,7 @@ const Permissions = () => {
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-white font-semibold text-center cursor-pointer hover:bg-blue-700 transition-colors"
                     onClick={() => ordenarPorCampo('estado')}
                   >
@@ -936,7 +938,7 @@ const Permissions = () => {
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     className="px-4 py-3 text-white font-semibold text-center cursor-pointer hover:bg-blue-700 transition-colors"
                     onClick={() => ordenarPorCampo('tipo_permiso')}
                   >
@@ -967,8 +969,8 @@ const Permissions = () => {
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold
                           ${permiso.estado === 'aprobado' ? 'bg-green-100 text-green-700 border border-green-300' :
                             permiso.estado === 'rechazado' ? 'bg-red-100 text-red-700 border border-red-300' :
-                            permiso.estado === 'visto_bueno' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
-                            'bg-yellow-100 text-yellow-700 border border-yellow-300'}`}
+                              permiso.estado === 'visto_bueno' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
+                                'bg-yellow-100 text-yellow-700 border border-yellow-300'}`}
                         >
                           {estadoIcon(permiso.estado)} {permiso.estado?.toUpperCase()}
                         </span>
@@ -998,24 +1000,23 @@ const Permissions = () => {
               >
                 Anterior
               </button>
-              
+
               {/* Números de página */}
               <div className="flex gap-1">
                 {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
                   <button
                     key={pagina}
                     onClick={() => setPaginaActual(pagina)}
-                    className={`px-3 py-2 rounded-lg transition-colors ${
-                      pagina === paginaActual
+                    className={`px-3 py-2 rounded-lg transition-colors ${pagina === paginaActual
                         ? 'bg-[#2E7D32] text-white'
                         : 'bg-gray-200 text-[#2E7D32] hover:bg-gray-300 dark:bg-gray-700 dark:text-[#4CAF50] dark:hover:bg-gray-600'
-                    }`}
+                      }`}
                   >
                     {pagina}
                   </button>
                 ))}
               </div>
-              
+
               <button
                 onClick={() => setPaginaActual(paginaActual + 1)}
                 disabled={paginaActual === totalPaginas}
@@ -1050,7 +1051,7 @@ const Permissions = () => {
                     </span>
                   )}
                 </div>
-                <button 
+                <button
                   onClick={() => setShowModal(false)}
                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                 >
@@ -1135,9 +1136,8 @@ const Permissions = () => {
                   <label className="block text-sm font-semibold mb-2 text-[#2E7D32] dark:text-[#4CAF50]">Fecha Permiso</label>
                   <input
                     type="date"
-                    className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${
-                      selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]'
-                    }`}
+                    className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]'
+                      }`}
                     value={
                       newPermission.fecha_permiso?.split('T')[0] || ''
                     }
@@ -1152,9 +1152,8 @@ const Permissions = () => {
                   <label className="block text-sm font-semibold mb-2 text-[#2E7D32] dark:text-[#4CAF50]">Hora Permiso</label>
                   <input
                     type="time"
-                    className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${
-                      selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]'
-                    }`}
+                    className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]'
+                      }`}
                     value={newPermission.hora}
                     onChange={(e) => !selectedPermission && setNewPermission({ ...newPermission, hora: e.target.value })}
                     readOnly={!!selectedPermission}
@@ -1166,9 +1165,8 @@ const Permissions = () => {
                   <label className="block text-sm font-semibold mb-2 text-[#2E7D32] dark:text-[#4CAF50]">Duración (Horas)</label>
                   <input
                     type="number"
-                    className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${
-                      selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]'
-                    }`}
+                    className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]'
+                      }`}
                     value={newPermission.duracion}
                     onChange={(e) => !selectedPermission && setNewPermission({ ...newPermission, duracion: e.target.value })}
                     readOnly={!!selectedPermission}
@@ -1182,9 +1180,8 @@ const Permissions = () => {
               <div>
                 <label className="block text-sm font-semibold mb-2 text-[#2E7D32] dark:text-[#4CAF50]">Tipo de Permiso</label>
                 <select
-                  className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${
-                    selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                  }`}
+                  className={`border border-gray-300 dark:border-gray-600 p-3 w-full rounded-lg ${selectedPermission ? 'bg-gray-50 dark:bg-gray-700 text-[#1B5E20] dark:text-white' : 'bg-white dark:bg-gray-700 text-[#1B5E20] dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                    }`}
                   value={newPermission.tipo_solicitud_id}
                   onChange={(e) => !selectedPermission && setNewPermission({ ...newPermission, tipo_solicitud_id: e.target.value })}
                   disabled={!!selectedPermission}
@@ -1261,31 +1258,32 @@ const Permissions = () => {
                   <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-sm">
                     <p className="text-sm font-semibold text-gray-700 mb-3">📎 Archivos Adjuntos:</p>
                     <ul className="space-y-2">
-                      {(selectedPermission.adjuntos || []).map((archivo: any, index: number) => (
-                        <li
-                          key={index}
-                          className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <span className="text-green-500 text-lg">{archivo.tipo_mime.includes("image") ? "🖼️" : "📄"}</span>
+                      {(selectedPermission.adjuntos || []).map((archivo: any, index: number) => {
+                        const rutaRel = normalizarRutaAdjunto(archivo.ruta_archivo);
+                        const url = buildAdjuntoUrl(rutaRel);
+                        return (
+                          <li key={index} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md">
+                            <div className="flex items-center space-x-3">
+                              <span className="text-green-500 text-lg">{archivo.tipo_mime.includes("image") ? "🖼️" : "📄"}</span>
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:underline truncate max-w-xs"
+                              >
+                                {archivo.nombre_archivo}
+                              </a>
+                            </div>
                             <a
-                              href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${archivo.ruta_archivo}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-blue-600 hover:underline truncate max-w-xs"
+                              href={url}
+                              download={archivo.nombre_archivo}
+                              className="ml-3 text-green-500 hover:text-green-700 transition"
                             >
-                              {archivo.nombre_archivo}
+                              ⬇️
                             </a>
-                          </div>
-                          <a
-                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${archivo.ruta_archivo}`}
-                            download={archivo.nombre_archivo}
-                            className="ml-3 text-green-500 hover:text-green-700 transition"
-                          >
-                            ⬇️
-                          </a>
-                        </li>
-                      ))}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 )}
@@ -1296,9 +1294,8 @@ const Permissions = () => {
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Observaciones</label>
                 <textarea
-                  className={`border border-gray-300 p-3 w-full rounded-lg h-32 resize-none ${
-                    selectedPermission ? 'bg-gray-50 text-gray-600' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                  }`}
+                  className={`border border-gray-300 p-3 w-full rounded-lg h-32 resize-none ${selectedPermission ? 'bg-gray-50 text-gray-600' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                    }`}
                   placeholder={selectedPermission ? "" : "Escribe tus observaciones..."}
                   value={newPermission.observaciones}
                   onChange={(e) => !selectedPermission && setNewPermission({ ...newPermission, observaciones: e.target.value })}
