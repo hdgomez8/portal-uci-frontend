@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   // 🔍 DEBUG DETALLADO DE PETICIONES
   console.log('🔍 ===== REQUEST DEBUG =====');
   console.log('🌐 URL:', config.url);
@@ -24,7 +24,14 @@ api.interceptors.request.use((config) => {
   console.log('📦 Data:', config.data);
   console.log('🕐 Timestamp:', new Date().toISOString());
   console.log('🔍 ===== END REQUEST DEBUG =====');
-  
+
+  // Si el body es FormData, quitar Content-Type para que axios agregue el boundary
+  if (config.data instanceof FormData) {
+    if (config.headers) {
+      delete (config.headers as any)['Content-Type'];
+    }
+  }
+
   return config;
 });
 
@@ -38,7 +45,7 @@ api.interceptors.response.use(
     console.log('🔑 Headers:', response.headers);
     console.log('🕐 Timestamp:', new Date().toISOString());
     console.log('🔍 ===== END RESPONSE DEBUG =====');
-    
+
     return response;
   },
   (error) => {
@@ -50,43 +57,43 @@ api.interceptors.response.use(
     console.log('🔑 Headers:', error.response?.headers);
     console.log('🕐 Timestamp:', new Date().toISOString());
     console.log('🔍 ===== END ERROR DEBUG =====');
-    
+
     // 🚨 MANEJO DE TOKEN EXPIRADO
     if (error.response?.status === 400 || error.response?.status === 401) {
       console.log('🔐 Token expirado o inválido detectado');
       console.log('📝 Error data:', error.response?.data);
-      
+
       // Verificar si es un error de autenticación específico
       const errorData = error.response?.data;
-      const isAuthError = errorData?.message?.includes('token') || 
-                         errorData?.message?.includes('expired') ||
-                         errorData?.message?.includes('invalid') ||
-                         error.response?.status === 401;
-      
+      const isAuthError = errorData?.message?.includes('token') ||
+        errorData?.message?.includes('expired') ||
+        errorData?.message?.includes('invalid') ||
+        error.response?.status === 401;
+
       if (isAuthError) {
         console.log('🔐 Error de autenticación confirmado');
-        
+
         // Limpiar datos de sesión
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        
+
         // Mostrar mensaje al usuario
         console.warn('⚠️ Tu sesión ha expirado. Serás redirigido al login.');
-        
+
         // Redirigir al login después de un breve delay
         setTimeout(() => {
           window.location.href = '/login';
         }, 1000);
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
 
 export const userService = {
   getUsers: () => api.get('/usuarios'),
-  
+
   createUser: (userData: {
     nombres: string;
     email: string;
@@ -101,22 +108,22 @@ export const userService = {
     jefe_id: string;
     oficio: string;
   }) => api.post('/usuarios', userData),
-  
+
   updateUser: (id: string, userData: {
     email?: string;
     password?: string;
   }) => api.put(`/usuarios/${id}`, userData),
-  
+
   deleteUser: (id: string) => api.delete(`/usuarios/${id}`),
 };
 
 export const employeeService = {
   getAll: () => api.get('/empleados'),
-  
+
   getById: (id: string) => api.get(`/empleados/${id}`),
-  
+
   getJefeByEmpleadoId: (empleadoId: string) => api.get(`/empleados/${empleadoId}/jefe`),
-  
+
   create: (employeeData: {
     codigo: number;
     documento: string;
@@ -158,7 +165,7 @@ export const employeeService = {
     ccf: string;
     sucursal_pi: string;
   }) => api.post('/empleados', employeeData),
-  
+
   update: (id: string, employeeData: Partial<{
     codigo: number;
     documento: string;
@@ -200,7 +207,7 @@ export const employeeService = {
     ccf: string;
     sucursal_pi: string;
   }>) => api.put(`/empleados/${id}`, employeeData),
-  
+
   delete: (id: string) => api.delete(`/empleados/${id}`),
 
   // Nuevos métodos para manejar archivos
@@ -235,17 +242,17 @@ export const employeeService = {
   },
 
   getSignature: (id: string) => api.get(`/empleados/${id}/firma`),
-  
+
   deleteSignature: (id: string) => api.delete(`/empleados/${id}/firma`),
 
   getResume: (id: string) => api.get(`/empleados/${id}/upload-cv`, { responseType: 'blob' }),
-  
+
   updateArea: (id: string, areaId: string | null) => api.put(`/empleados/${id}/area`, { areaId }),
-  
+
   getEmailNotificacion: (id: string) => api.get(`/empleados/${id}/email-notificacion`),
 
   getByDocumento: (documento: string) => api.get(`/empleados/documento/${documento}`),
-  
+
   // Función para actualizar rápidamente el estado del empleado
   updateStatus: (id: string, estado: string) => api.patch(`/empleados/${id}/estado`, { estado_trabajador: estado }),
 };
@@ -272,7 +279,7 @@ export const solicitudesService = {
   getSolicitudesPorEmpleado: (empleadoId: string) => api.get(`/solicitudes/empleado/${empleadoId}`),
   getSolicitudesPorJefe: (jefeId: string) => api.get(`/solicitudes/jefe/${jefeId}`),
   crearSolicitud: (solicitudData: FormData) => api.post('/solicitudes', solicitudData),
-  actualizarEstadoSolicitud: (id: string, estado: string, motivo?: string) => 
+  actualizarEstadoSolicitud: (id: string, estado: string, motivo?: string) =>
     api.put(`/solicitudes/${id}/estado`, { estado, motivo }),
   descargarPDF: (id: string) => api.get(`/solicitudes/${id}/pdf`, { responseType: 'blob' }),
 };
