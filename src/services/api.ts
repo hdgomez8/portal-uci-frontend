@@ -95,8 +95,10 @@ api.interceptors.response.use(
 export const getPublicBase = () =>
   import.meta.env.VITE_PUBLIC_ORIGIN || window.location.origin;
 
-export const buildAdjuntoUrl = (rutaRelativa: string) =>
-  `${getPublicBase()}/uploads/${rutaRelativa}`;
+export const buildAdjuntoUrl = (rutaRelativa: string) => {
+  // Usar la ruta API alternativa para evitar problemas de autenticación
+  return `${getPublicBase()}/api/files/${rutaRelativa}`;
+};
 
 // Si a veces guardaste rutas absolutas de disco, normalízalas:
 export const normalizarRutaAdjunto = (rutaBD: string) => {
