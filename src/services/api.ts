@@ -12,8 +12,15 @@ const api = axios.create({
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  console.log('🔍 DEBUG - Interceptor de petición:');
+  console.log('  - Token en localStorage:', token ? 'Presente' : 'Ausente');
+  console.log('  - Token valor:', token ? token.substring(0, 20) + '...' : 'N/A');
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('  - Header Authorization añadido');
+  } else {
+    console.log('  - ⚠️ No hay token, petición sin autenticación');
   }
 
   // 🔍 DEBUG DETALLADO DE PETICIONES
