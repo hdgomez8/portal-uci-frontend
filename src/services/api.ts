@@ -100,8 +100,19 @@ export const buildAdjuntoUrl = (rutaRelativa: string) =>
 
 // Si a veces guardaste rutas absolutas de disco, normalízalas:
 export const normalizarRutaAdjunto = (rutaBD: string) => {
+  // Si la ruta ya empieza con 'uploads/', remover ese prefijo
+  if (rutaBD.startsWith('uploads/')) {
+    return rutaBD.substring('uploads/'.length);
+  }
+  
+  // Si contiene '/uploads/', extraer solo la parte después de '/uploads/'
   const idx = rutaBD.indexOf('/uploads/');
-  return idx >= 0 ? rutaBD.substring(idx + '/uploads/'.length) : rutaBD;
+  if (idx >= 0) {
+    return rutaBD.substring(idx + '/uploads/'.length);
+  }
+  
+  // Si no contiene 'uploads/', devolver tal como está
+  return rutaBD;
 };
 
 export const userService = {
