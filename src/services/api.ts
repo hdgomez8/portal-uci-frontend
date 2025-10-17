@@ -63,6 +63,31 @@ api.interceptors.response.use(
     console.log('📝 Data:', error.response?.data);
     console.log('🔑 Headers:', error.response?.headers);
     console.log('🕐 Timestamp:', new Date().toISOString());
+    
+    // 🔍 DEBUG ESPECÍFICO PARA ERRORES 500
+    if (error.response?.status === 500 && error.response?.data) {
+      console.log('🔍 ===== ERROR 500 DETAILS =====');
+      console.log('❌ Error Message:', error.response.data.detalle);
+      console.log('🔧 Error Type:', error.response.data.tipo);
+      console.log('🔢 Error Code:', error.response.data.codigo);
+      console.log('📋 Stack Trace:', error.response.data.stack);
+      
+      if (error.response.data.debug) {
+        console.log('🔍 ===== DEBUG INFO =====');
+        console.log('👤 Usuario autenticado:', error.response.data.debug.usuario_autenticado);
+        console.log('👥 Empleado ID:', error.response.data.debug.empleado_id);
+        console.log('📋 Tipo solicitud ID:', error.response.data.debug.tipo_solicitud_id);
+        console.log('📅 Fecha:', error.response.data.debug.fecha);
+        console.log('📅 Fecha permiso:', error.response.data.debug.fecha_permiso);
+        console.log('🕐 Hora:', error.response.data.debug.hora);
+        console.log('⏱️ Duración:', error.response.data.debug.duracion);
+        console.log('📝 Observaciones:', error.response.data.debug.observaciones);
+        console.log('📎 Archivos:', error.response.data.debug.archivos_count);
+        console.log('🔍 ===== END DEBUG INFO =====');
+      }
+      console.log('🔍 ===== END ERROR 500 DETAILS =====');
+    }
+    
     console.log('🔍 ===== END ERROR DEBUG =====');
 
     // 🚨 MANEJO DE TOKEN EXPIRADO
