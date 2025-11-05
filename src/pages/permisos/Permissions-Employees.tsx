@@ -260,6 +260,14 @@ const Permissions = () => {
       return;
     }
 
+    // 🔍 DEBUG - Verificar datos del usuario
+    console.log('🔍 DEBUG - Datos del usuario:');
+    console.log('  - user completo:', user);
+    console.log('  - user.empleado:', user?.empleado);
+    console.log('  - user.empleado?.id:', user?.empleado?.id);
+    console.log('  - user.id:', user?.id);
+    console.log('  - empleado_id que se enviará:', newPermission.empleado_id);
+
     // Asegurar que la fecha se envíe correctamente
     const fechaPermisoCorregida = ensureCorrectDate(newPermission.fecha_permiso);
 
@@ -404,7 +412,7 @@ const Permissions = () => {
       setSelectedPermission(null); // Limpiar si es nuevo
       // Resetear el formulario para nuevo permiso
       setNewPermission({
-        empleado_id: user?.id,
+        empleado_id: user?.empleado?.id,
         tipo_solicitud_id: '',
         fecha: getCurrentDate(),
         fecha_permiso: '',

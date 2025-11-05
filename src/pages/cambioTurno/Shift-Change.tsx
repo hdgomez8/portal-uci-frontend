@@ -441,7 +441,7 @@ const ShiftChange = () => {
   const manejarCambioTurno = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validaciones básicas
-    if (!nombreCompleto || !fechaSolicitud || !fechaTurnoCambiar || !horarioCambiar || !fechaTurnoReemplazo || !horarioReemplazo || !nombreReemplazo || !cedulaReemplazo) {
+    if (!nombreCompleto || !fechaSolicitud || !fechaTurnoCambiar || !fechaTurnoReemplazo || !horarioCambiar || !horarioReemplazo || !nombreReemplazo || !cedulaReemplazo) {
       setError("Todos los campos obligatorios deben estar llenos");
       toast.error("Todos los campos obligatorios deben estar llenos");
       return;
@@ -494,7 +494,8 @@ const ShiftChange = () => {
     try {
       await cambioTurnoService.crear({
         empleado_id: user?.empleado?.id || user?.id,
-        fecha: fechaSolicitud,
+        fecha: fechaTurnoCambiar, // Fecha en que se realizará el cambio de turno
+        fecha_turno_reemplazo: fechaTurnoReemplazo, // Fecha en que se realizará el turno de reemplazo
         horario_cambiar: horarioCambiar,
         horario_reemplazo: horarioReemplazo,
         motivo: motivoCambio,
@@ -577,9 +578,19 @@ const ShiftChange = () => {
     setModalVistoBueno(true);
   };
 
-  const abrirModalDetalles = (solicitud: any) => {
+  const abrirModalDetalles = async (solicitud: any) => {
+    try {
+      // Obtener los datos completos de la solicitud desde el backend
+      const response = await cambioTurnoService.obtener(solicitud.id);
+      setSolicitudDetalles(response.data);
+      setModalDetalles(true);
+    } catch (error) {
+      console.error('Error al obtener detalles de la solicitud:', error);
+      // Si falla, usar los datos de la lista
     setSolicitudDetalles(solicitud);
     setModalDetalles(true);
+      toast.error('Error al cargar los detalles completos de la solicitud');
+    }
   };
 
   const aprobarVistoBueno = async () => {
@@ -649,11 +660,23 @@ const ShiftChange = () => {
     }
   };
 
-  const abrirModalJefe = (solicitud: any, tipo: 'aprobar' | 'rechazar') => {
+  const abrirModalJefe = async (solicitud: any, tipo: 'aprobar' | 'rechazar') => {
+    try {
+      // Obtener los datos completos de la solicitud desde el backend
+      const response = await cambioTurnoService.obtener(solicitud.id);
+      setSolicitudJefe(response.data);
+      setTipoJefe(tipo);
+      setMotivoJefe("");
+      setModalJefe(true);
+    } catch (error) {
+      console.error('Error al obtener detalles de la solicitud:', error);
+      // Si falla, usar los datos de la lista
     setSolicitudJefe(solicitud);
     setTipoJefe(tipo);
     setMotivoJefe("");
     setModalJefe(true);
+      toast.error('Error al cargar los detalles completos de la solicitud');
+    }
   };
 
   const aprobarPorJefe = async () => {
@@ -798,10 +821,10 @@ const ShiftChange = () => {
         empleado: solicitud.nombre_completo || 'Sin nombre',
         documento: solicitud.cedula || '',
         cargo: solicitud.cargo || '',
-        fecha_solicitud: solicitud.fecha_solicitud ? new Date(solicitud.fecha_solicitud).toLocaleDateString() : '',
-        fecha_turno_cambiar: solicitud.fecha_turno_cambiar ? new Date(solicitud.fecha_turno_cambiar).toLocaleDateString() : '',
-        horario_cambiar: solicitud.horario_cambiar || '',
+        fecha_solicitud: solicitud.fecha_creacion ? new Date(solicitud.fecha_creacion).toLocaleDateString() : '',
+        fecha_turno_cambiar: solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : '',
         fecha_turno_reemplazo: solicitud.fecha_turno_reemplazo ? new Date(solicitud.fecha_turno_reemplazo).toLocaleDateString() : '',
+        horario_cambiar: solicitud.horario_cambiar || '',
         horario_reemplazo: solicitud.horario_reemplazo || '',
         nombre_reemplazo: solicitud.nombre_reemplazo || '',
         cedula_reemplazo: solicitud.cedula_reemplazo || '',
@@ -1166,7 +1189,7 @@ const ShiftChange = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Horario Reemplazo</label>
+                      <label className="block text-sm font-medium mb-1">Horario a Realizar</label>
                       <select className="input mt-1" value={horarioReemplazo} onChange={e => setHorarioReemplazo(e.target.value)} required>
                         <option value="">Seleccionar horario</option>
                         <option value="CORRIDO">CORRIDO</option>
@@ -1418,22 +1441,19 @@ const ShiftChange = () => {
               <table className="w-full min-w-[800px] divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Colaborador
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha Solicitud
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha Turno a Realizar / Horario a Realizar
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Horario Cambiar
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha Turno del Cambio / Horario Cambiar
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Horario Reemplazo
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -1447,10 +1467,39 @@ const ShiftChange = () => {
                         {(solicitud.empleado?.nombres || '').toUpperCase() || "SIN NOMBRE"}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {solicitud.fecha ? solicitud.fecha.split('T')[0].split('-').reverse().join('/') : "SIN FECHA"}
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            {solicitud.fecha_turno_reemplazo ? (() => {
+                              const fechaStr = solicitud.fecha_turno_reemplazo.toString();
+                              if (fechaStr.includes('T')) {
+                                const [year, month, day] = fechaStr.split('T')[0].split('-');
+                                return `${day}/${month}/${year}`;
+                              } else {
+                                const [year, month, day] = fechaStr.split('-');
+                                return `${day}/${month}/${year}`;
+                              }
+                            })() : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-600">{solicitud.horario_reemplazo || "-"}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-center">{solicitud.horario_cambiar || "-"}</td>
-                      <td className="px-4 py-3 text-center">{solicitud.horario_reemplazo || "-"}</td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            {solicitud.fecha ? (() => {
+                              const fechaStr = solicitud.fecha.toString();
+                              if (fechaStr.includes('T')) {
+                                const [year, month, day] = fechaStr.split('T')[0].split('-');
+                                return `${day}/${month}/${year}`;
+                              } else {
+                                const [year, month, day] = fechaStr.split('-');
+                                return `${day}/${month}/${year}`;
+                              }
+                            })() : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-600">{solicitud.horario_cambiar || "-"}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getEstadoClass(solicitud.estado)}`}>
                           {getEstadoIcon(solicitud.estado)} {solicitud.estado?.toUpperCase()}
@@ -1544,22 +1593,19 @@ const ShiftChange = () => {
                 <table className="w-full min-w-[800px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Solicitante
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha Solicitud
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Turno que Cubrirás / Horario a Cubrir
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Horario Cambiar
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Turno a Cambiar / Horario a Cambiar
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Horario Reemplazo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Motivo
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -1572,10 +1618,39 @@ const ShiftChange = () => {
                         {solicitud.empleado?.nombres?.toUpperCase() || "SIN NOMBRE"}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {solicitud.fecha ? solicitud.fecha.split('T')[0].split('-').reverse().join('/') : "SIN FECHA"}
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            {solicitud.fecha ? (() => {
+                              const fechaStr = solicitud.fecha.toString();
+                              if (fechaStr.includes('T')) {
+                                const [year, month, day] = fechaStr.split('T')[0].split('-');
+                                return `${day}/${month}/${year}`;
+                              } else {
+                                const [year, month, day] = fechaStr.split('-');
+                                return `${day}/${month}/${year}`;
+                              }
+                            })() : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-600">{solicitud.horario_cambiar || "-"}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-center">{solicitud.horario_cambiar || "-"}</td>
-                      <td className="px-4 py-3 text-center">{solicitud.horario_reemplazo || "-"}</td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            {solicitud.fecha_turno_reemplazo ? (() => {
+                              const fechaStr = solicitud.fecha_turno_reemplazo.toString();
+                              if (fechaStr.includes('T')) {
+                                const [year, month, day] = fechaStr.split('T')[0].split('-');
+                                return `${day}/${month}/${year}`;
+                              } else {
+                                const [year, month, day] = fechaStr.split('-');
+                                return `${day}/${month}/${year}`;
+                              }
+                            })() : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-600">{solicitud.horario_reemplazo || "-"}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-center max-w-xs truncate" title={solicitud.motivo}>
                         {solicitud.motivo || "-"}
                       </td>
@@ -1630,19 +1705,19 @@ const ShiftChange = () => {
                 <table className="w-full min-w-[800px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Solicitante
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Reemplazo
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fecha
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fecha Turno a Realizar / Horario a Realizar
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Horarios
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Fecha Turno del Cambio / Horario Cambiar
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -1658,12 +1733,37 @@ const ShiftChange = () => {
                         {solicitud.nombre_reemplazo || "-"}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {solicitud.fecha ? solicitud.fecha.split('T')[0].split('-').reverse().join('/') : "SIN FECHA"}
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            {solicitud.fecha_turno_reemplazo ? (() => {
+                              const fechaStr = solicitud.fecha_turno_reemplazo.toString();
+                              if (fechaStr.includes('T')) {
+                                const [year, month, day] = fechaStr.split('T')[0].split('-');
+                                return `${day}/${month}/${year}`;
+                              } else {
+                                const [year, month, day] = fechaStr.split('-');
+                                return `${day}/${month}/${year}`;
+                              }
+                            })() : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-600">{solicitud.horario_reemplazo || "-"}</span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <div className="text-xs">
-                          <div><strong>Cambiar:</strong> {solicitud.horario_cambiar || "-"}</div>
-                          <div><strong>Reemplazo:</strong> {solicitud.horario_reemplazo || "-"}</div>
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            {solicitud.fecha ? (() => {
+                              const fechaStr = solicitud.fecha.toString();
+                              if (fechaStr.includes('T')) {
+                                const [year, month, day] = fechaStr.split('T')[0].split('-');
+                                return `${day}/${month}/${year}`;
+                              } else {
+                                const [year, month, day] = fechaStr.split('-');
+                                return `${day}/${month}/${year}`;
+                              }
+                            })() : "N/A"}
+                          </span>
+                          <span className="text-xs text-gray-600">{solicitud.horario_cambiar || "-"}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 flex justify-center gap-2">
@@ -1699,68 +1799,262 @@ const ShiftChange = () => {
       {/* Modal de Visto Bueno */}
       {modalVistoBueno && solicitudVistoBueno && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
-            <div className="flex justify-between items-center border-b px-6 py-4 rounded-t-xl bg-white dark:bg-gray-800">
-              <h2 className="text-xl font-bold text-[#2E7D32] dark:text-[#4CAF50]">
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
+            tipoVistoBueno === 'aprobar' 
+              ? 'border-t-4 border-green-500' 
+              : 'border-t-4 border-red-500'
+          }`}>
+            {/* Header */}
+            <div className={`flex justify-between items-center px-6 py-4 rounded-t-xl sticky top-0 z-10 ${
+              tipoVistoBueno === 'aprobar'
+                ? 'bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30'
+                : 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30'
+            }`}>
+              <div className="flex items-center gap-3">
+                {tipoVistoBueno === 'aprobar' ? (
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                )}
+                <h2 className={`text-2xl font-bold ${
+                  tipoVistoBueno === 'aprobar'
+                    ? 'text-green-700 dark:text-green-300'
+                    : 'text-red-700 dark:text-red-300'
+                }`}>
                 {tipoVistoBueno === 'aprobar' ? 'Aprobar Visto Bueno' : 'Rechazar Visto Bueno'}
               </h2>
+              </div>
               <button 
                 onClick={() => {
                   setModalVistoBueno(false);
                   setSolicitudVistoBueno(null);
                   setMotivoVistoBueno("");
                 }} 
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                className="p-2 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-full transition-colors"
               >
-                <XCircle className="w-6 h-6 text-[#2E7D32] hover:text-[#1B5E20] dark:text-[#66BB6A] dark:hover:text-[#4CAF50]" />
+                <XCircle className={`w-6 h-6 ${
+                  tipoVistoBueno === 'aprobar'
+                    ? 'text-green-600 hover:text-green-700 dark:text-green-400'
+                    : 'text-red-600 hover:text-red-700 dark:text-red-400'
+                }`} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Detalles de la Solicitud:</h3>
-                <div className="text-sm space-y-1">
-                  <p><strong>Solicitante:</strong> {solicitudVistoBueno.empleado?.nombres || 'N/A'}</p>
-                  <p><strong>Fecha de la solicitud:</strong> {solicitudVistoBueno.fecha}</p>
-                  <p><strong>Horario a cambiar:</strong> {solicitudVistoBueno.horario_cambiar}</p>
-                  <p><strong>Horario de reemplazo:</strong> {solicitudVistoBueno.horario_reemplazo}</p>
-                  <p><strong>Motivo:</strong> {solicitudVistoBueno.motivo}</p>
-                  <p><strong>Reemplazo solicitado:</strong> {solicitudVistoBueno.nombre_reemplazo} (Tú)</p>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-6">
+              {/* Información del Solicitante */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Información del Solicitante
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.empleado?.nombres || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.empleado?.documento || 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
               
+              {/* Detalles del Cambio de Turno */}
+              <div className={`p-4 rounded-lg border ${
+                tipoVistoBueno === 'aprobar'
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${
+                  tipoVistoBueno === 'aprobar'
+                    ? 'text-green-800 dark:text-green-200'
+                    : 'text-amber-800 dark:text-amber-200'
+                }`}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Detalles del Cambio de Turno
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Turno que Cubrirás</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.fecha ? (() => {
+                        const fechaStr = solicitudVistoBueno.fecha.toString();
+                        if (fechaStr.includes('T')) {
+                          const fecha = new Date(solicitudVistoBueno.fecha);
+                          const fechaLocal = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+                          const day = String(fechaLocal.getDate()).padStart(2, '0');
+                          const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+                          const year = fechaLocal.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        } else {
+                          const [year, month, day] = fechaStr.split('T')[0].split('-');
+                          return `${day}/${month}/${year}`;
+                        }
+                      })() : 'N/A'}
+                    </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario a Cubrir</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.horario_cambiar || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Turno a Cambiar</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.fecha_turno_reemplazo ? (() => {
+                        const fechaStr = solicitudVistoBueno.fecha_turno_reemplazo.toString();
+                        if (fechaStr.includes('T')) {
+                          const fecha = new Date(solicitudVistoBueno.fecha_turno_reemplazo);
+                          const fechaLocal = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+                          const day = String(fechaLocal.getDate()).padStart(2, '0');
+                          const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+                          const year = fechaLocal.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        } else {
+                          const [year, month, day] = fechaStr.split('T')[0].split('-');
+                          return `${day}/${month}/${year}`;
+                        }
+                      })() : 'N/A'}
+                    </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario a Cambiar</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.horario_reemplazo || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Información del Reemplazo */}
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Tu Información (Reemplazo)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre del Reemplazo</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.nombre_reemplazo || 'N/A'} <span className="text-xs text-blue-600 dark:text-blue-400">(Tú)</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudVistoBueno.cedula_reemplazo || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Motivo */}
+              {solicitudVistoBueno.motivo && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Motivo del Cambio
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudVistoBueno.motivo}
+                  </p>
+                </div>
+              )}
+              
+              {/* Campo de comentario/motivo */}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  {tipoVistoBueno === 'aprobar' ? 'Comentario (opcional):' : 'Motivo del rechazo:'}
+                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                  {tipoVistoBueno === 'aprobar' ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Comentario (opcional)
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Motivo del rechazo <span className="text-red-500">*</span>
+                    </span>
+                  )}
                 </label>
                 <textarea 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]"
-                  rows={3}
+                  className={`w-full p-4 border-2 rounded-lg transition-all duration-200 ${
+                    tipoVistoBueno === 'aprobar'
+                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:border-green-700 dark:bg-gray-700 dark:text-gray-100'
+                      : 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:border-red-700 dark:bg-gray-700 dark:text-gray-100'
+                  }`}
+                  rows={4}
                   value={motivoVistoBueno}
                   onChange={(e) => setMotivoVistoBueno(e.target.value)}
-                  placeholder={tipoVistoBueno === 'aprobar' ? 'Agregar comentario opcional...' : 'Especificar motivo del rechazo...'}
+                  placeholder={
+                    tipoVistoBueno === 'aprobar' 
+                      ? 'Agregar un comentario opcional sobre tu aprobación...' 
+                      : 'Especificar el motivo por el cual rechazas este visto bueno (requerido)...'
+                  }
+                  required={tipoVistoBueno === 'rechazar'}
                 />
+                {tipoVistoBueno === 'rechazar' && !motivoVistoBueno && (
+                  <p className="mt-1 text-sm text-red-500">El motivo del rechazo es obligatorio</p>
+                )}
               </div>
               
-              <div className="flex justify-end space-x-3 mt-6">
+              {/* Botones de acción */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button 
                   onClick={() => {
                     setModalVistoBueno(false);
                     setSolicitudVistoBueno(null);
                     setMotivoVistoBueno("");
                   }} 
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={tipoVistoBueno === 'aprobar' ? aprobarVistoBueno : rechazarVistoBueno}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+                  disabled={tipoVistoBueno === 'rechazar' && !motivoVistoBueno}
+                  className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
                     tipoVistoBueno === 'aprobar' 
-                      ? 'bg-green-500 hover:bg-green-600' 
-                      : 'bg-red-500 hover:bg-red-600'
+                      ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl' 
+                      : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed'
                   }`}
                 >
-                  {tipoVistoBueno === 'aprobar' ? 'Aprobar' : 'Rechazar'}
+                  {tipoVistoBueno === 'aprobar' ? (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Aprobar Visto Bueno
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Rechazar Visto Bueno
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1771,68 +2065,311 @@ const ShiftChange = () => {
       {/* Modal de Jefe de Área */}
       {modalJefe && solicitudJefe && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md">
-            <div className="flex justify-between items-center border-b px-6 py-4 rounded-t-xl bg-white dark:bg-gray-800">
-              <h2 className="text-xl font-bold text-[#2E7D32] dark:text-[#4CAF50]">
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
+            tipoJefe === 'aprobar' 
+              ? 'border-t-4 border-blue-500' 
+              : 'border-t-4 border-red-500'
+          }`}>
+            {/* Header */}
+            <div className={`flex justify-between items-center px-6 py-4 rounded-t-xl sticky top-0 z-10 ${
+              tipoJefe === 'aprobar'
+                ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30'
+                : 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30'
+            }`}>
+              <div className="flex items-center gap-3">
+                {tipoJefe === 'aprobar' ? (
+                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                )}
+                <div>
+                  <h2 className={`text-2xl font-bold ${
+                    tipoJefe === 'aprobar'
+                      ? 'text-blue-700 dark:text-blue-300'
+                      : 'text-red-700 dark:text-red-300'
+                  }`}>
                 {tipoJefe === 'aprobar' ? 'Aprobar Solicitud' : 'Rechazar Solicitud'}
               </h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Jefe de Área</p>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setModalJefe(false);
                   setSolicitudJefe(null);
                   setMotivoJefe("");
                 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                className="p-2 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-full transition-colors"
               >
-                <XCircle className="w-6 h-6 text-[#2E7D32] hover:text-[#1B5E20] dark:text-[#66BB6A] dark:hover:text-[#4CAF50]" />
+                <XCircle className={`w-6 h-6 ${
+                  tipoJefe === 'aprobar'
+                    ? 'text-blue-600 hover:text-blue-700 dark:text-blue-400'
+                    : 'text-red-600 hover:text-red-700 dark:text-red-400'
+                }`} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Detalles de la Solicitud:</h3>
-                <div className="text-sm space-y-1">
-                  <p><strong>Solicitante:</strong> {solicitudJefe.empleado?.nombres || 'N/A'}</p>
-                  <p><strong>Reemplazo:</strong> {solicitudJefe.nombre_reemplazo || 'N/A'}</p>
-                  <p><strong>Fecha:</strong> {solicitudJefe.fecha}</p>
-                  <p><strong>Horario a cambiar:</strong> {solicitudJefe.horario_cambiar}</p>
-                  <p><strong>Horario de reemplazo:</strong> {solicitudJefe.horario_reemplazo}</p>
-                  <p><strong>Motivo:</strong> {solicitudJefe.motivo}</p>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-6">
+              {/* Información del Solicitante */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Información del Solicitante
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.empleado?.nombres || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.empleado?.documento || 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
+              {/* Detalles del Cambio de Turno */}
+              <div className={`p-4 rounded-lg border ${
+                tipoJefe === 'aprobar'
+                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                  : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${
+                  tipoJefe === 'aprobar'
+                    ? 'text-blue-800 dark:text-blue-200'
+                    : 'text-amber-800 dark:text-amber-200'
+                }`}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Detalles del Cambio de Turno
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  {tipoJefe === 'aprobar' ? 'Comentario (opcional):' : 'Motivo del rechazo:'}
-                </label>
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4CAF50] focus:border-[#4CAF50]"
-                  rows={3}
-                  value={motivoJefe}
-                  onChange={(e) => setMotivoJefe(e.target.value)}
-                  placeholder={tipoJefe === 'aprobar' ? 'Agregar comentario opcional...' : 'Especificar motivo del rechazo...'}
-                />
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha Turno a Realizar</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.fecha_turno_reemplazo ? (() => {
+                        const fechaStr = solicitudJefe.fecha_turno_reemplazo.toString();
+                        if (fechaStr.includes('T')) {
+                          const fecha = new Date(solicitudJefe.fecha_turno_reemplazo);
+                          const fechaLocal = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+                          const day = String(fechaLocal.getDate()).padStart(2, '0');
+                          const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+                          const year = fechaLocal.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        } else {
+                          const [year, month, day] = fechaStr.split('T')[0].split('-');
+                          return `${day}/${month}/${year}`;
+                        }
+                      })() : 'N/A'}
+                    </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario a Realizar</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">{solicitudJefe.horario_reemplazo || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha Turno del Cambio</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.fecha ? (() => {
+                        const fechaStr = solicitudJefe.fecha.toString();
+                        if (fechaStr.includes('T')) {
+                          const fecha = new Date(solicitudJefe.fecha);
+                          const fechaLocal = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+                          const day = String(fechaLocal.getDate()).padStart(2, '0');
+                          const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+                          const year = fechaLocal.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        } else {
+                          const [year, month, day] = fechaStr.split('T')[0].split('-');
+                          return `${day}/${month}/${year}`;
+                        }
+                      })() : 'N/A'}
+                    </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario Cambiar</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.horario_cambiar || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Horario a Realizar</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.horario_reemplazo || 'N/A'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-3 mt-6">
+              {/* Información del Reemplazo */}
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Información del Reemplazo
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre del Reemplazo</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.nombre_reemplazo || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudJefe.cedula_reemplazo || 'N/A'}
+                    </p>
+                  </div>
+                  {solicitudJefe.visto_bueno_reemplazo && (
+                    <div className="md:col-span-2">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Estado del Visto Bueno</p>
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold mt-1 ${
+                        solicitudJefe.visto_bueno_reemplazo === 'Aprobado' || solicitudJefe.visto_bueno_reemplazo === 'Aprobado'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                          : solicitudJefe.visto_bueno_reemplazo === 'Rechazado'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                      }`}>
+                        {solicitudJefe.visto_bueno_reemplazo === 'Aprobado' || solicitudJefe.visto_bueno_reemplazo === 'Aprobado' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : solicitudJefe.visto_bueno_reemplazo === 'Rechazado' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )}
+                        {solicitudJefe.visto_bueno_reemplazo}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Motivo */}
+              {solicitudJefe.motivo && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Motivo del Cambio
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudJefe.motivo}
+                  </p>
+                </div>
+              )}
+
+              {/* Observaciones */}
+              {solicitudJefe.observaciones && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Observaciones
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudJefe.observaciones}
+                  </p>
+                </div>
+              )}
+              
+              {/* Campo de comentario/motivo */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                  {tipoJefe === 'aprobar' ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Comentario (opcional)
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Motivo del rechazo <span className="text-red-500">*</span>
+                    </span>
+                  )}
+                </label>
+                <textarea
+                  className={`w-full p-4 border-2 rounded-lg transition-all duration-200 ${
+                    tipoJefe === 'aprobar'
+                      ? 'border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-blue-700 dark:bg-gray-700 dark:text-gray-100'
+                      : 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:border-red-700 dark:bg-gray-700 dark:text-gray-100'
+                  }`}
+                  rows={4}
+                  value={motivoJefe}
+                  onChange={(e) => setMotivoJefe(e.target.value)}
+                  placeholder={
+                    tipoJefe === 'aprobar' 
+                      ? 'Agregar un comentario opcional sobre tu aprobación...' 
+                      : 'Especificar el motivo por el cual rechazas esta solicitud (requerido)...'
+                  }
+                  required={tipoJefe === 'rechazar'}
+                />
+                {tipoJefe === 'rechazar' && !motivoJefe && (
+                  <p className="mt-1 text-sm text-red-500">El motivo del rechazo es obligatorio</p>
+                )}
+              </div>
+
+              {/* Botones de acción */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => {
                     setModalJefe(false);
                     setSolicitudJefe(null);
                     setMotivoJefe("");
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={tipoJefe === 'aprobar' ? aprobarPorJefe : rechazarPorJefe}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
+                  disabled={tipoJefe === 'rechazar' && !motivoJefe}
+                  className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
                     tipoJefe === 'aprobar'
-                      ? 'bg-green-500 hover:bg-green-600'
-                      : 'bg-red-500 hover:bg-red-600'
+                      ? 'bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl' 
+                      : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed'
                   }`}
                 >
-                  {tipoJefe === 'aprobar' ? 'Aprobar' : 'Rechazar'}
+                  {tipoJefe === 'aprobar' ? (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Aprobar Solicitud
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Rechazar Solicitud
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1883,24 +2420,56 @@ const ShiftChange = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha Turno a Realizar</p>
                     <p className="text-base font-semibold">
-                      {solicitudDetalles.fecha ? solicitudDetalles.fecha.split('T')[0].split('-').reverse().join('/') : 'N/A'}
+                      {solicitudDetalles.fecha_turno_reemplazo ? (() => {
+                        // fecha_turno_reemplazo viene como DATEONLY (YYYY-MM-DD), procesar directamente
+                        const fechaStr = solicitudDetalles.fecha_turno_reemplazo.toString();
+                        if (fechaStr.includes('T')) {
+                          const fecha = new Date(solicitudDetalles.fecha_turno_reemplazo);
+                          const fechaLocal = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+                          const day = String(fechaLocal.getDate()).padStart(2, '0');
+                          const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+                          const year = fechaLocal.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        } else {
+                          // Si viene como YYYY-MM-DD, procesar directamente
+                          const [year, month, day] = fechaStr.split('T')[0].split('-');
+                          return `${day}/${month}/${year}`;
+                        }
+                      })() : 'N/A'}
                     </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario a Realizar</p>
+                    <p className="text-base font-semibold">{solicitudDetalles.horario_reemplazo || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha Turno del Cambio</p>
+                    <p className="text-base font-semibold">
+                      {solicitudDetalles.fecha ? (() => {
+                        // fecha viene como DATEONLY (YYYY-MM-DD), procesar directamente
+                        const fechaStr = solicitudDetalles.fecha.toString();
+                        if (fechaStr.includes('T')) {
+                          const fecha = new Date(solicitudDetalles.fecha);
+                          const fechaLocal = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+                          const day = String(fechaLocal.getDate()).padStart(2, '0');
+                          const month = String(fechaLocal.getMonth() + 1).padStart(2, '0');
+                          const year = fechaLocal.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        } else {
+                          // Si viene como YYYY-MM-DD, procesar directamente
+                          const [year, month, day] = fechaStr.split('T')[0].split('-');
+                          return `${day}/${month}/${year}`;
+                        }
+                      })() : 'N/A'}
+                    </p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario Cambiar</p>
+                    <p className="text-base font-semibold">{solicitudDetalles.horario_cambiar || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Estado</p>
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getEstadoClass(solicitudDetalles.estado)}`}>
                       {getEstadoIcon(solicitudDetalles.estado)} {solicitudDetalles.estado?.toUpperCase()}
                     </span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Horario a Cambiar</p>
-                    <p className="text-base font-semibold">{solicitudDetalles.horario_cambiar || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Horario de Reemplazo</p>
-                    <p className="text-base font-semibold">{solicitudDetalles.horario_reemplazo || 'N/A'}</p>
                   </div>
                 </div>
               </div>
