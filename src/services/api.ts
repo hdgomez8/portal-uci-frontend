@@ -90,32 +90,68 @@ api.interceptors.response.use(
     
     console.log('🔍 ===== END ERROR DEBUG =====');
 
-    // 🚨 MANEJO DE TOKEN EXPIRADO
-    if (error.response?.status === 400 || error.response?.status === 401) {
-      console.log('🔐 Token expirado o inválido detectado');
+    // 🚨 MANEJO DE TOKEN EXPIRADO O INVÁLIDO
+    if (error.response?.status === 401) {
+      console.log('🔐 Error de autenticación detectado (401)');
       console.log('📝 Error data:', error.response?.data);
 
-      // Verificar si es un error de autenticación específico
       const errorData = error.response?.data;
-      const isAuthError = errorData?.message?.includes('token') ||
-        errorData?.message?.includes('expired') ||
-        errorData?.message?.includes('invalid') ||
-        error.response?.status === 401;
+      const errorMessage = errorData?.message?.toLowerCase() || '';
+      
+      // Verificar si es un error de autenticación (token expirado, inválido, etc.)
+      const isAuthError = errorMessage.includes('token') ||
+        errorMessage.includes('expired') ||
+        errorMessage.includes('invalid') ||
+        errorMessage.includes('expirado') ||
+        errorMessage.includes('inválido') ||
+        errorMessage.includes('acceso denegado') ||
+        errorData?.expired === true;
 
       if (isAuthError) {
-        console.log('🔐 Error de autenticación confirmado');
+        console.log('🔐 Error de autenticación confirmado - Redirigiendo al login');
 
         // Limpiar datos de sesión
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('usuario');
+
+        // Limpiar Redux store si está disponible
+        try {
+          const store = (window as any).__REDUX_STORE__;
+          if (store) {
+            store.dispatch({ type: 'auth/logout' });
+          }
+        } catch (e) {
+          console.log('No se pudo limpiar Redux store');
+        }
 
         // Mostrar mensaje al usuario
         console.warn('⚠️ Tu sesión ha expirado. Serás redirigido al login.');
 
-        // Redirigir al login después de un breve delay
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 1000);
+        // Redirigir al login inmediatamente (usar replace para evitar que el usuario pueda volver atrás)
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
+        return Promise.reject(error);
+      }
+    }
+    
+    // También manejar errores 400 relacionados con tokens (por compatibilidad)
+    if (error.response?.status === 400) {
+      const errorData = error.response?.data;
+      const errorMessage = errorData?.message?.toLowerCase() || '';
+      
+      if (errorMessage.includes('token') && (errorMessage.includes('invalid') || errorMessage.includes('inválido'))) {
+        console.log('🔐 Token inválido detectado (400) - Redirigiendo al login');
+        
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('usuario');
+        
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
+        return Promise.reject(error);
       }
     }
 

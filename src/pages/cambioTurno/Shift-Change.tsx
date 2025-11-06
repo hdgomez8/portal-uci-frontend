@@ -816,19 +816,46 @@ const ShiftChange = () => {
 
   const exportarCambiosTurnoAExcel = () => {
     try {
+      // Función helper para formatear fechas en formato DD/MM/YYYY
+      const formatearFecha = (fecha: any) => {
+        if (!fecha) return '';
+        try {
+          const fechaStr = fecha.toString();
+          let fechaObj: Date;
+          
+          if (fechaStr.includes('T')) {
+            fechaObj = new Date(fecha);
+          } else if (fechaStr.includes('-')) {
+            // Si viene como YYYY-MM-DD, procesar directamente
+            const [year, month, day] = fechaStr.split('T')[0].split('-');
+            return `${day}/${month}/${year}`;
+          } else {
+            fechaObj = new Date(fecha);
+          }
+          
+          const day = String(fechaObj.getDate()).padStart(2, '0');
+          const month = String(fechaObj.getMonth() + 1).padStart(2, '0');
+          const year = fechaObj.getFullYear();
+          return `${day}/${month}/${year}`;
+        } catch (error) {
+          console.error('Error formateando fecha:', error);
+          return '';
+        }
+      };
+
       // Preparar datos para exportación
       const datosParaExportar = solicitudesFiltradasYOrdenadas.map(solicitud => ({
-        empleado: solicitud.nombre_completo || 'Sin nombre',
-        documento: solicitud.cedula || '',
+        empleado: solicitud.empleado?.nombres || solicitud.nombre_completo || 'Sin nombre',
+        documento: solicitud.empleado?.documento || solicitud.cedula || '',
         cargo: solicitud.cargo || '',
-        fecha_solicitud: solicitud.fecha_creacion ? new Date(solicitud.fecha_creacion).toLocaleDateString() : '',
-        fecha_turno_cambiar: solicitud.fecha ? new Date(solicitud.fecha).toLocaleDateString() : '',
-        fecha_turno_reemplazo: solicitud.fecha_turno_reemplazo ? new Date(solicitud.fecha_turno_reemplazo).toLocaleDateString() : '',
-        horario_cambiar: solicitud.horario_cambiar || '',
-        horario_reemplazo: solicitud.horario_reemplazo || '',
+        fecha_solicitud: formatearFecha(solicitud.fecha_creacion),
+        fecha_turno_cambiar: formatearFecha(solicitud.fecha_turno_reemplazo), // Fecha Turno a Realizar
+        horario_cambiar: solicitud.horario_reemplazo || '', // Horario a Realizar
+        fecha_turno_reemplazo: formatearFecha(solicitud.fecha), // Fecha Turno del Cambio
+        horario_reemplazo: solicitud.horario_cambiar || '', // Horario a Cambiar
         nombre_reemplazo: solicitud.nombre_reemplazo || '',
         cedula_reemplazo: solicitud.cedula_reemplazo || '',
-        motivo_cambio: solicitud.motivo_cambio || '',
+        motivo_cambio: solicitud.motivo || solicitud.motivo_cambio || '',
         estado: solicitud.estado?.toUpperCase() || '',
         observaciones: solicitud.observaciones || ''
       }));

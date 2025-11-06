@@ -86,7 +86,32 @@ export const exportSolicitudesToExcel = (data: any[], type: string) => {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
   const filename = `${type}_${timestamp}`;
   
-  // Columnas comunes para solicitudes
+  // Si es tipo 'cambios_turno', usar columnas específicas
+  if (type === 'cambios_turno') {
+    const columns = [
+      { key: 'empleado', header: 'Empleado' },
+      { key: 'documento', header: 'Documento' },
+      { key: 'cargo', header: 'Cargo' },
+      { key: 'fecha_solicitud', header: 'Fecha de Solicitud' },
+      { key: 'fecha_turno_cambiar', header: 'Fecha Turno a Realizar' },
+      { key: 'horario_cambiar', header: 'Horario a Realizar' },
+      { key: 'fecha_turno_reemplazo', header: 'Fecha Turno del Cambio' },
+      { key: 'horario_reemplazo', header: 'Horario a Cambiar' },
+      { key: 'nombre_reemplazo', header: 'Nombre Reemplazo' },
+      { key: 'cedula_reemplazo', header: 'Cédula Reemplazo' },
+      { key: 'motivo_cambio', header: 'Motivo del Cambio' },
+      { key: 'estado', header: 'Estado' },
+      { key: 'observaciones', header: 'Observaciones' }
+    ];
+
+    return exportToExcel(data, columns, {
+      filename,
+      sheetName: 'Cambios de Turno',
+      autoWidth: true
+    });
+  }
+  
+  // Columnas comunes para otras solicitudes
   const columns = [
     { key: 'empleado', header: 'Empleado' },
     { key: 'documento', header: 'Documento' },
