@@ -12,25 +12,10 @@ const api = axios.create({
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  console.log('🔍 DEBUG - Interceptor de petición:');
-  console.log('  - Token en localStorage:', token ? 'Presente' : 'Ausente');
-  console.log('  - Token valor:', token ? token.substring(0, 20) + '...' : 'N/A');
   
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('  - Header Authorization añadido');
-  } else {
-    console.log('  - ⚠️ No hay token, petición sin autenticación');
   }
-
-  // 🔍 DEBUG DETALLADO DE PETICIONES
-  console.log('🔍 ===== REQUEST DEBUG =====');
-  console.log('🌐 URL:', config.url);
-  console.log('📋 Method:', config.method?.toUpperCase());
-  console.log('🔑 Headers:', config.headers);
-  console.log('📦 Data:', config.data);
-  console.log('🕐 Timestamp:', new Date().toISOString());
-  console.log('🔍 ===== END REQUEST DEBUG =====');
 
   // Si el body es FormData, quitar Content-Type para que axios agregue el boundary
   if (config.data instanceof FormData) {
@@ -45,56 +30,11 @@ api.interceptors.request.use((config) => {
 // Interceptor para manejar respuestas y errores
 api.interceptors.response.use(
   (response) => {
-    // 🔍 DEBUG DETALLADO DE RESPUESTAS
-    console.log('🔍 ===== RESPONSE DEBUG =====');
-    console.log('📊 Status:', response.status);
-    console.log('📝 Data:', response.data);
-    console.log('🔑 Headers:', response.headers);
-    console.log('🕐 Timestamp:', new Date().toISOString());
-    console.log('🔍 ===== END RESPONSE DEBUG =====');
-
     return response;
   },
   (error) => {
-    // 🔍 DEBUG DETALLADO DE ERRORES
-    console.log('🔍 ===== ERROR DEBUG =====');
-    console.log('❌ Error:', error.message);
-    console.log('📊 Status:', error.response?.status);
-    console.log('📝 Data:', error.response?.data);
-    console.log('🔑 Headers:', error.response?.headers);
-    console.log('🕐 Timestamp:', new Date().toISOString());
-    
-    // 🔍 DEBUG ESPECÍFICO PARA ERRORES 500
-    if (error.response?.status === 500 && error.response?.data) {
-      console.log('🔍 ===== ERROR 500 DETAILS =====');
-      console.log('❌ Error Message:', error.response.data.detalle);
-      console.log('🔧 Error Type:', error.response.data.tipo);
-      console.log('🔢 Error Code:', error.response.data.codigo);
-      console.log('📋 Stack Trace:', error.response.data.stack);
-      
-      if (error.response.data.debug) {
-        console.log('🔍 ===== DEBUG INFO =====');
-        console.log('👤 Usuario autenticado:', error.response.data.debug.usuario_autenticado);
-        console.log('👥 Empleado ID:', error.response.data.debug.empleado_id);
-        console.log('📋 Tipo solicitud ID:', error.response.data.debug.tipo_solicitud_id);
-        console.log('📅 Fecha:', error.response.data.debug.fecha);
-        console.log('📅 Fecha permiso:', error.response.data.debug.fecha_permiso);
-        console.log('🕐 Hora:', error.response.data.debug.hora);
-        console.log('⏱️ Duración:', error.response.data.debug.duracion);
-        console.log('📝 Observaciones:', error.response.data.debug.observaciones);
-        console.log('📎 Archivos:', error.response.data.debug.archivos_count);
-        console.log('🔍 ===== END DEBUG INFO =====');
-      }
-      console.log('🔍 ===== END ERROR 500 DETAILS =====');
-    }
-    
-    console.log('🔍 ===== END ERROR DEBUG =====');
-
     // 🚨 MANEJO DE TOKEN EXPIRADO O INVÁLIDO
     if (error.response?.status === 401) {
-      console.log('🔐 Error de autenticación detectado (401)');
-      console.log('📝 Error data:', error.response?.data);
-
       const errorData = error.response?.data;
       const errorMessage = errorData?.message?.toLowerCase() || '';
       
@@ -108,8 +48,6 @@ api.interceptors.response.use(
         errorData?.expired === true;
 
       if (isAuthError) {
-        console.log('🔐 Error de autenticación confirmado - Redirigiendo al login');
-
         // Limpiar datos de sesión
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -122,11 +60,8 @@ api.interceptors.response.use(
             store.dispatch({ type: 'auth/logout' });
           }
         } catch (e) {
-          console.log('No se pudo limpiar Redux store');
+          // Silencioso
         }
-
-        // Mostrar mensaje al usuario
-        console.warn('⚠️ Tu sesión ha expirado. Serás redirigido al login.');
 
         // Redirigir al login inmediatamente (usar replace para evitar que el usuario pueda volver atrás)
         if (window.location.pathname !== '/login') {
@@ -142,8 +77,6 @@ api.interceptors.response.use(
       const errorMessage = errorData?.message?.toLowerCase() || '';
       
       if (errorMessage.includes('token') && (errorMessage.includes('invalid') || errorMessage.includes('inválido'))) {
-        console.log('🔐 Token inválido detectado (400) - Redirigiendo al login');
-        
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('usuario');

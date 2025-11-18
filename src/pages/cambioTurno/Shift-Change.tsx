@@ -291,7 +291,6 @@ const ShiftChange = () => {
       setSolicitudes(response.data);
       setError(null);
     } catch (error) {
-      console.error('Error al cargar solicitudes:', error);
       setError("Error al cargar solicitudes de cambio de turno");
       toast.error("Error al cargar solicitudes");
     } finally {
@@ -320,38 +319,23 @@ const ShiftChange = () => {
         setEmpleadosArea(empleadosFiltrados);
         setEmpleadosMismaArea(empleadosFiltrados);
       } else {
-        console.log('No se encontró área asignada al usuario');
         setEmpleadosArea([]);
         setEmpleadosMismaArea([]);
       }
     } catch (error) {
-      console.error('Error al cargar empleados del área:', error);
       toast.error("Error al cargar empleados del área");
     }
   };
 
   const cargarPendientesVistoBueno = async () => {
     try {
-      // Debugging completo de los datos del usuario
-      console.log('🔍 Debugging completo del usuario:', user);
-      console.log('🔍 Token:', localStorage.getItem('token'));
-      
       // Buscar el documento en diferentes ubicaciones posibles
       const documento = user?.documento || user?.empleado?.documento || user?.empleado?.id;
       
       if (!documento) {
-        console.error('No se pudo obtener el documento del usuario:', user);
         toast.error("No se pudo obtener el documento del usuario");
         return;
       }
-      
-      console.log('🔍 Buscando pendientes por visto bueno para documento:', documento);
-      console.log('🔍 Datos del usuario:', {
-        documento: user?.documento,
-        empleadoDocumento: user?.empleado?.documento,
-        empleadoId: user?.empleado?.id,
-        nombres: user?.empleado?.nombres
-      });
       
       // Probar múltiples identificadores
       const identificadores = [
@@ -360,23 +344,19 @@ const ShiftChange = () => {
         user?.empleado?.nombres
       ].filter(Boolean);
       
-      console.log('🔍 Probando con identificadores:', identificadores);
-      
       let solicitudesEncontradas = [];
       
       // Probar cada identificador
       for (const identificador of identificadores) {
         try {
-          console.log(`🔍 Probando con identificador: "${identificador}"`);
           const response = await cambioTurnoService.pendientesVistoBueno(identificador);
           
           if (response.data && response.data.length > 0) {
-            console.log(`✅ Encontradas ${response.data.length} solicitudes con identificador "${identificador}"`);
             solicitudesEncontradas = response.data;
             break;
           }
         } catch (error) {
-          console.log(`❌ Error con identificador "${identificador}":`, error);
+          // Continuar con el siguiente identificador
         }
       }
       
@@ -391,32 +371,21 @@ const ShiftChange = () => {
         const departamentoGestionado = obtenerDepartamentoGestionado();
         
         if (departamentoGestionado) {
-          console.log(`🔍 Filtrando pendientes por visto bueno por departamento gestionado: ${departamentoGestionado}`);
-          console.log(`🔍 Roles del usuario: ${user?.roles?.map((r: any) => r.nombre).join(', ')}`);
-          console.log(`🔍 Departamento personal del usuario: ${user?.empleado?.areas?.[0]?.departamento?.nombre}`);
-          
           // Filtrar solicitudes que pertenecen al departamento que gestiona
           solicitudesFiltradas = solicitudesEncontradas.filter((solicitud: any) => {
             // Verificar si el empleado de la solicitud pertenece al departamento gestionado
             const empleadoDepartamento = solicitud.empleado?.areas?.[0]?.departamento?.nombre;
             return empleadoDepartamento === departamentoGestionado;
           });
-          
-          console.log(`📊 Pendientes por visto bueno filtrados por departamento gestionado: ${solicitudesFiltradas.length} de ${solicitudesEncontradas.length}`);
-        } else {
-          console.log('⚠️ Usuario con rol de supervisión pero sin departamento gestionado asignado');
         }
       }
       
       setPendientesVistoBueno(solicitudesFiltradas);
       
-      console.log('📊 Pendientes por visto bueno encontrados:', solicitudesFiltradas.length);
-      
       if (solicitudesFiltradas.length === 0) {
         toast.info("No tienes solicitudes pendientes por visto bueno");
       }
     } catch (error: any) {
-      console.error('Error al cargar pendientes por visto bueno:', error);
       toast.error("Error al cargar pendientes por visto bueno");
     }
   };
@@ -468,14 +437,6 @@ const ShiftChange = () => {
     const fechaReemplazo = new Date(fechaTurnoReemplazo + 'T00:00:00');
     
     // Logs de depuración para ver qué está pasando con las fechas
-    console.log('🔍 Debug fechas:');
-    console.log('   Fecha actual (hoy):', hoy.toISOString());
-    console.log('   Fecha turno a cambiar:', fechaTurnoCambiar);
-    console.log('   Fecha turno a cambiar (Date):', fechaCambiar.toISOString());
-    console.log('   Fecha turno reemplazo:', fechaTurnoReemplazo);
-    console.log('   Fecha turno reemplazo (Date):', fechaReemplazo.toISOString());
-    console.log('   Comparación fechaCambiar < hoy:', fechaCambiar < hoy);
-    console.log('   Comparación fechaReemplazo < hoy:', fechaReemplazo < hoy);
     
     // Validar que la fecha del turno a cambiar no sea anterior a la fecha actual
     if (fechaCambiar < hoy) {
@@ -533,7 +494,6 @@ const ShiftChange = () => {
         const resultados = await buscarEmpleados(value);
         setSugerencias(resultados);
       } catch (error) {
-        console.error('Error en búsqueda:', error);
       } finally {
         setCargandoSugerencias(false);
       }
@@ -585,7 +545,6 @@ const ShiftChange = () => {
       setSolicitudDetalles(response.data);
       setModalDetalles(true);
     } catch (error) {
-      console.error('Error al obtener detalles de la solicitud:', error);
       // Si falla, usar los datos de la lista
     setSolicitudDetalles(solicitud);
     setModalDetalles(true);
@@ -634,7 +593,6 @@ const ShiftChange = () => {
     try {
       const jefeId = user?.empleado?.id;
       if (!jefeId) {
-        console.log('No se pudo obtener el ID del jefe');
         return;
       }
       
@@ -642,20 +600,15 @@ const ShiftChange = () => {
       const departamentoGestionado = obtenerDepartamentoGestionado();
       
       if (!departamentoGestionado) {
-        console.log('⚠️ Usuario sin departamento gestionado asignado');
         setEnRevision([]);
         return;
       }
       
-      console.log('🔍 Cargando solicitudes en revisión...');
-      console.log(`🔍 Departamento gestionado: ${departamentoGestionado}`);
       
       const response = await cambioTurnoService.enRevision(jefeId, departamentoGestionado);
       setEnRevision(response.data || []);
       
-      console.log('📊 Solicitudes en revisión encontradas:', response.data?.length || 0);
     } catch (error: any) {
-      console.error('Error al cargar solicitudes en revisión:', error);
       toast.error("Error al cargar solicitudes en revisión");
     }
   };
@@ -669,7 +622,6 @@ const ShiftChange = () => {
       setMotivoJefe("");
       setModalJefe(true);
     } catch (error) {
-      console.error('Error al obtener detalles de la solicitud:', error);
       // Si falla, usar los datos de la lista
     setSolicitudJefe(solicitud);
     setTipoJefe(tipo);
@@ -696,7 +648,6 @@ const ShiftChange = () => {
       setMotivoJefe("");
       cargarEnRevision();
     } catch (error: any) {
-      console.error('Error al aprobar solicitud:', error);
       toast.error("Error al aprobar solicitud");
     }
   };
@@ -712,7 +663,6 @@ const ShiftChange = () => {
       setMotivoJefe("");
       cargarEnRevision();
     } catch (error: any) {
-      console.error('Error al rechazar solicitud:', error);
       toast.error("Error al rechazar solicitud");
     }
   };
@@ -838,7 +788,6 @@ const ShiftChange = () => {
           const year = fechaObj.getFullYear();
           return `${day}/${month}/${year}`;
         } catch (error) {
-          console.error('Error formateando fecha:', error);
           return '';
         }
       };
@@ -869,7 +818,6 @@ const ShiftChange = () => {
         setError('❌ Error al exportar cambios de turno a Excel');
       }
     } catch (error) {
-      console.error('Error exportando cambios de turno:', error);
       setError('❌ Error al exportar cambios de turno a Excel');
     }
   };
@@ -1918,7 +1866,7 @@ const ShiftChange = () => {
                   Detalles del Cambio de Turno
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+              <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Turno que Cubrirás</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {solicitudVistoBueno.fecha ? (() => {

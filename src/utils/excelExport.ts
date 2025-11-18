@@ -69,10 +69,8 @@ export const exportToExcel = (
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
-    console.log('✅ Archivo Excel exportado exitosamente');
     return true;
   } catch (error) {
-    console.error('❌ Error exportando a Excel:', error);
     return false;
   }
 };
