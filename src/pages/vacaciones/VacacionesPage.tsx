@@ -1422,57 +1422,299 @@ const VacacionesPage = () => {
       )}
 
       {/* Modal para Jefe */}
-      {modalJefe && (
+      {modalJefe && solicitudActual && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {tipoAccion === "aprobar" ? "Aprobar Solicitud" : "Rechazar Solicitud"}
-              </h3>
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  Solicitud de: <strong>{solicitudActual?.empleado?.nombres}</strong>
-                </p>
-                <p className="text-sm text-gray-600">
-                  Días: {solicitudActual?.dias_disfrute}
-                </p>
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
+            tipoAccion === 'aprobar' 
+              ? 'border-t-4 border-green-500' 
+              : 'border-t-4 border-red-500'
+          }`}>
+            {/* Header */}
+            <div className={`flex justify-between items-center px-6 py-4 rounded-t-xl sticky top-0 z-10 ${
+              tipoAccion === 'aprobar'
+                ? 'bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30'
+                : 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30'
+            }`}>
+              <div className="flex items-center gap-3">
+                {tipoAccion === 'aprobar' ? (
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <XCircle className="w-6 h-6 text-white" />
+                  </div>
+                )}
+                <div>
+                  <h2 className={`text-2xl font-bold ${
+                    tipoAccion === 'aprobar'
+                      ? 'text-green-700 dark:text-green-300'
+                      : 'text-red-700 dark:text-red-300'
+                  }`}>
+                    {tipoAccion === 'aprobar' ? 'Aprobar Solicitud' : 'Rechazar Solicitud'}
+                  </h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Jefe de Área</p>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {tipoAccion === "aprobar" ? "Observaciones (opcional)" : "Motivo del rechazo"}
+              <button
+                onClick={() => {
+                  if (loadingAprobacion) return;
+                  setModalJefe(false);
+                  setSolicitudActual(null);
+                  setMotivo('');
+                }}
+                disabled={loadingAprobacion}
+                className={`p-2 rounded-full transition-colors ${
+                  loadingAprobacion 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                <XCircle className={`w-6 h-6 ${
+                  tipoAccion === 'aprobar'
+                    ? 'text-green-600 hover:text-green-700 dark:text-green-400'
+                    : 'text-red-600 hover:text-red-700 dark:text-red-400'
+                }`} />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-6">
+              {/* Información del Solicitante */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                  <UserIcon className="w-5 h-5" />
+                  Información del Solicitante
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.empleado?.nombres || solicitudActual?.nombres_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.empleado?.documento || solicitudActual?.cedula_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cargo</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.cargo_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ciudad/Departamento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.ciudad_departamento || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detalles de la Solicitud */}
+              <div className={`p-4 rounded-lg border ${
+                tipoAccion === 'aprobar'
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${
+                  tipoAccion === 'aprobar'
+                    ? 'text-green-800 dark:text-green-200'
+                    : 'text-amber-800 dark:text-amber-200'
+                }`}>
+                  <Calendar className="w-5 h-5" />
+                  Detalles de la Solicitud de Vacaciones
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.fecha_solicitud ? new Date(solicitudActual.fecha_solicitud).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Días de Disfrute</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.dias_disfrute || 0} días
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Desde</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_cumplido_desde ? new Date(solicitudActual.periodo_cumplido_desde).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Hasta</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_cumplido_hasta ? new Date(solicitudActual.periodo_cumplido_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Desde</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_disfrute_desde ? new Date(solicitudActual.periodo_disfrute_desde).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Hasta</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_disfrute_hasta ? new Date(solicitudActual.periodo_disfrute_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Días Cumplidos</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.dias_cumplidos || 0} días
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Estado</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                      solicitudActual?.estado === 'aprobado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                      solicitudActual?.estado === 'rechazado' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                    }`}>
+                      {solicitudActual?.estado?.replace('_', ' ').toUpperCase() || 'PENDIENTE'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Información del Reemplazo */}
+              {solicitudActual?.reemplazo_nombre && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                    <UserIcon className="w-5 h-5" />
+                    Información del Reemplazo
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre del Reemplazo</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {solicitudActual.reemplazo_nombre || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Identificación</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {solicitudActual.reemplazo_identificacion || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Actividades Pendientes */}
+              {solicitudActual?.actividades_pendientes && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Actividades Pendientes
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudActual.actividades_pendientes}
+                  </p>
+                </div>
+              )}
+
+              {/* Observaciones */}
+              {solicitudActual?.observaciones && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Observaciones
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudActual.observaciones}
+                  </p>
+                </div>
+              )}
+
+              {/* Campo de comentario/motivo */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                  {tipoAccion === 'aprobar' ? (
+                    <span className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      Comentario (opcional)
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <XCircle className="w-4 h-4" />
+                      Motivo del rechazo <span className="text-red-500">*</span>
+                    </span>
+                  )}
                 </label>
                 <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
+                  className={`w-full p-4 border-2 rounded-lg transition-all duration-200 ${
+                    tipoAccion === 'aprobar'
+                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:border-green-700 dark:bg-gray-700 dark:text-gray-100'
+                      : 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:border-red-700 dark:bg-gray-700 dark:text-gray-100'
+                  }`}
+                  rows={4}
                   value={motivo}
                   onChange={(e) => setMotivo(e.target.value)}
-                  placeholder={tipoAccion === "aprobar" ? "Observaciones adicionales..." : "Motivo del rechazo..."}
+                  placeholder={
+                    tipoAccion === 'aprobar' 
+                      ? 'Agregar un comentario opcional sobre tu aprobación...' 
+                      : 'Especificar el motivo por el cual rechazas esta solicitud (requerido)...'
+                  }
+                  required={tipoAccion === 'rechazar'}
                 />
+                {tipoAccion === 'rechazar' && !motivo && (
+                  <p className="mt-1 text-sm text-red-500">El motivo del rechazo es obligatorio</p>
+                )}
               </div>
-              <div className="flex justify-end space-x-3">
+
+              {/* Botones de acción */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={() => setModalJefe(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  onClick={() => {
+                    if (loadingAprobacion) return;
+                    setModalJefe(false);
+                    setSolicitudActual(null);
+                    setMotivo('');
+                  }}
                   disabled={loadingAprobacion}
+                  className={`px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200 ${
+                    loadingAprobacion 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={() => manejarAccion('jefe')}
-                  disabled={loadingAprobacion}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors flex items-center ${
-                    tipoAccion === "aprobar" 
-                      ? "bg-green-500 hover:bg-green-600" 
-                      : "bg-red-500 hover:bg-red-600"
-                  } ${loadingAprobacion ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={loadingAprobacion || (tipoAccion === 'rechazar' && !motivo)}
+                  className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                    tipoAccion === 'aprobar'
+                      ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl' 
+                      : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl'
+                  } ${loadingAprobacion || (tipoAccion === 'rechazar' && !motivo) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loadingAprobacion ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
                       Procesando...
                     </>
+                  ) : tipoAccion === 'aprobar' ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Aprobar Solicitud
+                    </>
                   ) : (
-                    tipoAccion === "aprobar" ? "Aprobar" : "Rechazar"
+                    <>
+                      <XCircle className="w-5 h-5" />
+                      Rechazar Solicitud
+                    </>
                   )}
                 </button>
               </div>
@@ -1482,57 +1724,299 @@ const VacacionesPage = () => {
       )}
 
       {/* Modal para Administrador */}
-      {modalAdministrador && (
+      {modalAdministrador && solicitudActual && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {tipoAccion === "aprobar" ? "Aprobar Solicitud" : "Rechazar Solicitud"}
-              </h3>
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  Solicitud de: <strong>{solicitudActual?.empleado?.nombres}</strong>
-                </p>
-                <p className="text-sm text-gray-600">
-                  Días: {solicitudActual?.dias_disfrute}
-                </p>
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
+            tipoAccion === 'aprobar' 
+              ? 'border-t-4 border-green-500' 
+              : 'border-t-4 border-red-500'
+          }`}>
+            {/* Header */}
+            <div className={`flex justify-between items-center px-6 py-4 rounded-t-xl sticky top-0 z-10 ${
+              tipoAccion === 'aprobar'
+                ? 'bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30'
+                : 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30'
+            }`}>
+              <div className="flex items-center gap-3">
+                {tipoAccion === 'aprobar' ? (
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <XCircle className="w-6 h-6 text-white" />
+                  </div>
+                )}
+                <div>
+                  <h2 className={`text-2xl font-bold ${
+                    tipoAccion === 'aprobar'
+                      ? 'text-green-700 dark:text-green-300'
+                      : 'text-red-700 dark:text-red-300'
+                  }`}>
+                    {tipoAccion === 'aprobar' ? 'Aprobar Solicitud' : 'Rechazar Solicitud'}
+                  </h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Administración</p>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {tipoAccion === "aprobar" ? "Observaciones (opcional)" : "Motivo del rechazo"}
+              <button
+                onClick={() => {
+                  if (loadingAprobacion) return;
+                  setModalAdministrador(false);
+                  setSolicitudActual(null);
+                  setMotivo('');
+                }}
+                disabled={loadingAprobacion}
+                className={`p-2 rounded-full transition-colors ${
+                  loadingAprobacion 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                <XCircle className={`w-6 h-6 ${
+                  tipoAccion === 'aprobar'
+                    ? 'text-green-600 hover:text-green-700 dark:text-green-400'
+                    : 'text-red-600 hover:text-red-700 dark:text-red-400'
+                }`} />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-6">
+              {/* Información del Solicitante */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                  <UserIcon className="w-5 h-5" />
+                  Información del Solicitante
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.empleado?.nombres || solicitudActual?.nombres_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.empleado?.documento || solicitudActual?.cedula_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cargo</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.cargo_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ciudad/Departamento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.ciudad_departamento || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detalles de la Solicitud */}
+              <div className={`p-4 rounded-lg border ${
+                tipoAccion === 'aprobar'
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${
+                  tipoAccion === 'aprobar'
+                    ? 'text-green-800 dark:text-green-200'
+                    : 'text-amber-800 dark:text-amber-200'
+                }`}>
+                  <Calendar className="w-5 h-5" />
+                  Detalles de la Solicitud de Vacaciones
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.fecha_solicitud ? new Date(solicitudActual.fecha_solicitud).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Días de Disfrute</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.dias_disfrute || 0} días
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Desde</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_cumplido_desde ? new Date(solicitudActual.periodo_cumplido_desde).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Hasta</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_cumplido_hasta ? new Date(solicitudActual.periodo_cumplido_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Desde</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_disfrute_desde ? new Date(solicitudActual.periodo_disfrute_desde).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Hasta</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_disfrute_hasta ? new Date(solicitudActual.periodo_disfrute_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Días Cumplidos</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.dias_cumplidos || 0} días
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Estado</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                      solicitudActual?.estado === 'aprobado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                      solicitudActual?.estado === 'rechazado' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                    }`}>
+                      {solicitudActual?.estado?.replace('_', ' ').toUpperCase() || 'PENDIENTE'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Información del Reemplazo */}
+              {solicitudActual?.reemplazo_nombre && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                    <UserIcon className="w-5 h-5" />
+                    Información del Reemplazo
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre del Reemplazo</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {solicitudActual.reemplazo_nombre || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Identificación</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {solicitudActual.reemplazo_identificacion || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Actividades Pendientes */}
+              {solicitudActual?.actividades_pendientes && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Actividades Pendientes
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudActual.actividades_pendientes}
+                  </p>
+                </div>
+              )}
+
+              {/* Observaciones */}
+              {solicitudActual?.observaciones && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Observaciones
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudActual.observaciones}
+                  </p>
+                </div>
+              )}
+
+              {/* Campo de comentario/motivo */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                  {tipoAccion === 'aprobar' ? (
+                    <span className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      Comentario (opcional)
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <XCircle className="w-4 h-4" />
+                      Motivo del rechazo <span className="text-red-500">*</span>
+                    </span>
+                  )}
                 </label>
                 <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
+                  className={`w-full p-4 border-2 rounded-lg transition-all duration-200 ${
+                    tipoAccion === 'aprobar'
+                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:border-green-700 dark:bg-gray-700 dark:text-gray-100'
+                      : 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:border-red-700 dark:bg-gray-700 dark:text-gray-100'
+                  }`}
+                  rows={4}
                   value={motivo}
                   onChange={(e) => setMotivo(e.target.value)}
-                  placeholder={tipoAccion === "aprobar" ? "Observaciones adicionales..." : "Motivo del rechazo..."}
+                  placeholder={
+                    tipoAccion === 'aprobar' 
+                      ? 'Agregar un comentario opcional sobre tu aprobación...' 
+                      : 'Especificar el motivo por el cual rechazas esta solicitud (requerido)...'
+                  }
+                  required={tipoAccion === 'rechazar'}
                 />
+                {tipoAccion === 'rechazar' && !motivo && (
+                  <p className="mt-1 text-sm text-red-500">El motivo del rechazo es obligatorio</p>
+                )}
               </div>
-              <div className="flex justify-end space-x-3">
+
+              {/* Botones de acción */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={() => setModalAdministrador(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  onClick={() => {
+                    if (loadingAprobacion) return;
+                    setModalAdministrador(false);
+                    setSolicitudActual(null);
+                    setMotivo('');
+                  }}
                   disabled={loadingAprobacion}
+                  className={`px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200 ${
+                    loadingAprobacion 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={() => manejarAccion('administrador')}
-                  disabled={loadingAprobacion}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors flex items-center ${
-                    tipoAccion === "aprobar" 
-                      ? "bg-green-500 hover:bg-green-600" 
-                      : "bg-red-500 hover:bg-red-600"
-                  } ${loadingAprobacion ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={loadingAprobacion || (tipoAccion === 'rechazar' && !motivo)}
+                  className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                    tipoAccion === 'aprobar'
+                      ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl' 
+                      : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl'
+                  } ${loadingAprobacion || (tipoAccion === 'rechazar' && !motivo) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loadingAprobacion ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
                       Procesando...
                     </>
+                  ) : tipoAccion === 'aprobar' ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Aprobar Solicitud
+                    </>
                   ) : (
-                    tipoAccion === "aprobar" ? "Aprobar" : "Rechazar"
+                    <>
+                      <XCircle className="w-5 h-5" />
+                      Rechazar Solicitud
+                    </>
                   )}
                 </button>
               </div>
@@ -1542,57 +2026,299 @@ const VacacionesPage = () => {
       )}
 
       {/* Modal para RRHH */}
-      {modalRRHH && (
+      {modalRRHH && solicitudActual && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {tipoAccion === "aprobar" ? "Aprobar Solicitud" : "Rechazar Solicitud"}
-              </h3>
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  Solicitud de: <strong>{solicitudActual?.empleado?.nombres}</strong>
-                </p>
-                <p className="text-sm text-gray-600">
-                  Días: {solicitudActual?.dias_disfrute}
-                </p>
+          <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
+            tipoAccion === 'aprobar' 
+              ? 'border-t-4 border-green-500' 
+              : 'border-t-4 border-red-500'
+          }`}>
+            {/* Header */}
+            <div className={`flex justify-between items-center px-6 py-4 rounded-t-xl sticky top-0 z-10 ${
+              tipoAccion === 'aprobar'
+                ? 'bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30'
+                : 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30'
+            }`}>
+              <div className="flex items-center gap-3">
+                {tipoAccion === 'aprobar' ? (
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <XCircle className="w-6 h-6 text-white" />
+                  </div>
+                )}
+                <div>
+                  <h2 className={`text-2xl font-bold ${
+                    tipoAccion === 'aprobar'
+                      ? 'text-green-700 dark:text-green-300'
+                      : 'text-red-700 dark:text-red-300'
+                  }`}>
+                    {tipoAccion === 'aprobar' ? 'Aprobar Solicitud' : 'Rechazar Solicitud'}
+                  </h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Recursos Humanos</p>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {tipoAccion === "aprobar" ? "Observaciones (opcional)" : "Motivo del rechazo"}
+              <button
+                onClick={() => {
+                  if (loadingAprobacion) return;
+                  setModalRRHH(false);
+                  setSolicitudActual(null);
+                  setMotivo('');
+                }}
+                disabled={loadingAprobacion}
+                className={`p-2 rounded-full transition-colors ${
+                  loadingAprobacion 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                <XCircle className={`w-6 h-6 ${
+                  tipoAccion === 'aprobar'
+                    ? 'text-green-600 hover:text-green-700 dark:text-green-400'
+                    : 'text-red-600 hover:text-red-700 dark:text-red-400'
+                }`} />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-6 space-y-6">
+              {/* Información del Solicitante */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
+                  <UserIcon className="w-5 h-5" />
+                  Información del Solicitante
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.empleado?.nombres || solicitudActual?.nombres_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.empleado?.documento || solicitudActual?.cedula_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cargo</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.cargo_colaborador || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ciudad/Departamento</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.ciudad_departamento || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detalles de la Solicitud */}
+              <div className={`p-4 rounded-lg border ${
+                tipoAccion === 'aprobar'
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${
+                  tipoAccion === 'aprobar'
+                    ? 'text-green-800 dark:text-green-200'
+                    : 'text-amber-800 dark:text-amber-200'
+                }`}>
+                  <Calendar className="w-5 h-5" />
+                  Detalles de la Solicitud de Vacaciones
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.fecha_solicitud ? new Date(solicitudActual.fecha_solicitud).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Días de Disfrute</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.dias_disfrute || 0} días
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Desde</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_cumplido_desde ? new Date(solicitudActual.periodo_cumplido_desde).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Hasta</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_cumplido_hasta ? new Date(solicitudActual.periodo_cumplido_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Desde</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_disfrute_desde ? new Date(solicitudActual.periodo_disfrute_desde).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Hasta</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.periodo_disfrute_hasta ? new Date(solicitudActual.periodo_disfrute_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Días Cumplidos</p>
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      {solicitudActual?.dias_cumplidos || 0} días
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Estado</p>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                      solicitudActual?.estado === 'aprobado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                      solicitudActual?.estado === 'rechazado' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                    }`}>
+                      {solicitudActual?.estado?.replace('_', ' ').toUpperCase() || 'PENDIENTE'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Información del Reemplazo */}
+              {solicitudActual?.reemplazo_nombre && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                    <UserIcon className="w-5 h-5" />
+                    Información del Reemplazo
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre del Reemplazo</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {solicitudActual.reemplazo_nombre || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Identificación</p>
+                      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {solicitudActual.reemplazo_identificacion || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Actividades Pendientes */}
+              {solicitudActual?.actividades_pendientes && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-200 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Actividades Pendientes
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudActual.actividades_pendientes}
+                  </p>
+                </div>
+              )}
+
+              {/* Observaciones */}
+              {solicitudActual?.observaciones && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Observaciones
+                  </h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300">
+                    {solicitudActual.observaciones}
+                  </p>
+                </div>
+              )}
+
+              {/* Campo de comentario/motivo */}
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                  {tipoAccion === 'aprobar' ? (
+                    <span className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      Comentario (opcional)
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <XCircle className="w-4 h-4" />
+                      Motivo del rechazo <span className="text-red-500">*</span>
+                    </span>
+                  )}
                 </label>
                 <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
+                  className={`w-full p-4 border-2 rounded-lg transition-all duration-200 ${
+                    tipoAccion === 'aprobar'
+                      ? 'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:border-green-700 dark:bg-gray-700 dark:text-gray-100'
+                      : 'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:border-red-700 dark:bg-gray-700 dark:text-gray-100'
+                  }`}
+                  rows={4}
                   value={motivo}
                   onChange={(e) => setMotivo(e.target.value)}
-                  placeholder={tipoAccion === "aprobar" ? "Observaciones adicionales..." : "Motivo del rechazo..."}
+                  placeholder={
+                    tipoAccion === 'aprobar' 
+                      ? 'Agregar un comentario opcional sobre tu aprobación...' 
+                      : 'Especificar el motivo por el cual rechazas esta solicitud (requerido)...'
+                  }
+                  required={tipoAccion === 'rechazar'}
                 />
+                {tipoAccion === 'rechazar' && !motivo && (
+                  <p className="mt-1 text-sm text-red-500">El motivo del rechazo es obligatorio</p>
+                )}
               </div>
-              <div className="flex justify-end space-x-3">
+
+              {/* Botones de acción */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={() => setModalRRHH(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  onClick={() => {
+                    if (loadingAprobacion) return;
+                    setModalRRHH(false);
+                    setSolicitudActual(null);
+                    setMotivo('');
+                  }}
                   disabled={loadingAprobacion}
+                  className={`px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200 ${
+                    loadingAprobacion 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={() => manejarAccion('rrhh')}
-                  disabled={loadingAprobacion}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors flex items-center ${
-                    tipoAccion === "aprobar" 
-                      ? "bg-green-500 hover:bg-green-600" 
-                      : "bg-red-500 hover:bg-red-600"
-                  } ${loadingAprobacion ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={loadingAprobacion || (tipoAccion === 'rechazar' && !motivo)}
+                  className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                    tipoAccion === 'aprobar'
+                      ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl' 
+                      : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl'
+                  } ${loadingAprobacion || (tipoAccion === 'rechazar' && !motivo) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loadingAprobacion ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
                       Procesando...
                     </>
+                  ) : tipoAccion === 'aprobar' ? (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Aprobar Solicitud
+                    </>
                   ) : (
-                    tipoAccion === "aprobar" ? "Aprobar" : "Rechazar"
+                    <>
+                      <XCircle className="w-5 h-5" />
+                      Rechazar Solicitud
+                    </>
                   )}
                 </button>
               </div>
