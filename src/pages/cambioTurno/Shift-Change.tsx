@@ -133,6 +133,7 @@ const ShiftChange = () => {
   const [solicitudJefe, setSolicitudJefe] = useState<any>(null);
   const [motivoJefe, setMotivoJefe] = useState("");
   const [tipoJefe, setTipoJefe] = useState<'aprobar' | 'rechazar'>('aprobar');
+  const [loadingJefe, setLoadingJefe] = useState(false);
   
   // Estados para modal de detalles
   const [modalDetalles, setModalDetalles] = useState(false);
@@ -418,8 +419,8 @@ const ShiftChange = () => {
     
     // Validar que se hayan seleccionado horarios válidos
     if (!horarioCambiar || horarioCambiar === "") {
-      setError("Debe seleccionar un horario a cambiar");
-      toast.error("Debe seleccionar un horario a cambiar");
+      setError("Debe seleccionar un horario asignado");
+      toast.error("Debe seleccionar un horario asignado");
       return;
     }
     
@@ -438,17 +439,17 @@ const ShiftChange = () => {
     
     // Logs de depuración para ver qué está pasando con las fechas
     
-    // Validar que la fecha del turno a cambiar no sea anterior a la fecha actual
+    // Validar que la fecha del turno asignado no sea anterior a la fecha actual
     if (fechaCambiar < hoy) {
-      setError("La Fecha Turno a Cambiar no puede ser anterior a la fecha actual");
-      toast.error("La Fecha Turno a Cambiar no puede ser anterior a la fecha actual");
+      setError("La Fecha Turno Asignado no puede ser anterior a la fecha actual");
+      toast.error("La Fecha Turno Asignado no puede ser anterior a la fecha actual");
       return;
     }
     
-    // Validar que la fecha del turno de reemplazo no sea anterior a la fecha actual
+    // Validar que la fecha del turno a realizar no sea anterior a la fecha actual
     if (fechaReemplazo < hoy) {
-      setError("La Fecha Turno Reemplazo no puede ser anterior a la fecha actual");
-      toast.error("La Fecha Turno Reemplazo no puede ser anterior a la fecha actual");
+      setError("La Fecha Turno a Realizar no puede ser anterior a la fecha actual");
+      toast.error("La Fecha Turno a Realizar no puede ser anterior a la fecha actual");
       return;
     }
 
@@ -632,8 +633,9 @@ const ShiftChange = () => {
   };
 
   const aprobarPorJefe = async () => {
-    if (!solicitudJefe) return;
+    if (!solicitudJefe || loadingJefe) return;
     
+    setLoadingJefe(true);
     try {
       // Enviar información del jefe que está aprobando
       const datosAprobacion = {
@@ -646,24 +648,31 @@ const ShiftChange = () => {
       setModalJefe(false);
       setSolicitudJefe(null);
       setMotivoJefe("");
+      setLoadingJefe(false);
       cargarEnRevision();
     } catch (error: any) {
       toast.error("Error al aprobar solicitud");
+    } finally {
+      setLoadingJefe(false);
     }
   };
 
   const rechazarPorJefe = async () => {
-    if (!solicitudJefe) return;
+    if (!solicitudJefe || loadingJefe) return;
     
+    setLoadingJefe(true);
     try {
       await cambioTurnoService.rechazarPorJefe(solicitudJefe.id, motivoJefe);
       toast.success("Solicitud rechazada correctamente");
       setModalJefe(false);
       setSolicitudJefe(null);
       setMotivoJefe("");
+      setLoadingJefe(false);
       cargarEnRevision();
     } catch (error: any) {
       toast.error("Error al rechazar solicitud");
+    } finally {
+      setLoadingJefe(false);
     }
   };
 
@@ -1118,7 +1127,14 @@ const ShiftChange = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Fecha Solicitud</label>
-                      <input type="date" className="input mt-1" value={fechaSolicitud} onChange={e => setFechaSolicitud(e.target.value)} required readOnly />
+                      <input 
+                        type="date" 
+                        className="input mt-1" 
+                        value={fechaSolicitud} 
+                        onChange={e => setFechaSolicitud(e.target.value)} 
+                        max={getCurrentDate()}
+                        required 
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Nombre Completo</label>
@@ -1129,7 +1145,7 @@ const ShiftChange = () => {
                       <input type="text" className="input mt-1" value={cargo} onChange={e => setCargo(e.target.value)} required />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Fecha Turno a Cambiar</label>
+                      <label className="block text-sm font-medium mb-1">Fecha Turno Asignado</label>
                       <input 
                         type="date" 
                         className="input mt-1" 
@@ -1140,7 +1156,7 @@ const ShiftChange = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Horario a Cambiar</label>
+                      <label className="block text-sm font-medium mb-1">Horario Asignado</label>
                       <select className="input mt-1" value={horarioCambiar} onChange={e => setHorarioCambiar(e.target.value)} required>
                         <option value="">Seleccionar horario</option>
                         <option value="CORRIDO">CORRIDO</option>
@@ -1153,7 +1169,7 @@ const ShiftChange = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Fecha Turno Reemplazo</label>
+                      <label className="block text-sm font-medium mb-1">Fecha Turno a Realizar</label>
                       <input 
                         type="date" 
                         className="input mt-1" 
@@ -2078,11 +2094,18 @@ const ShiftChange = () => {
               </div>
               <button
                 onClick={() => {
+                  if (loadingJefe) return;
                   setModalJefe(false);
                   setSolicitudJefe(null);
                   setMotivoJefe("");
+                  setLoadingJefe(false);
                 }}
-                className="p-2 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-full transition-colors"
+                disabled={loadingJefe}
+                className={`p-2 rounded-full transition-colors ${
+                  loadingJefe 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
+                }`}
               >
                 <XCircle className={`w-6 h-6 ${
                   tipoJefe === 'aprobar'
@@ -2177,12 +2200,6 @@ const ShiftChange = () => {
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-2">Horario Cambiar</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {solicitudJefe.horario_cambiar || 'N/A'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Horario a Realizar</p>
-                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudJefe.horario_reemplazo || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -2311,41 +2328,58 @@ const ShiftChange = () => {
 
               {/* Botones de acción */}
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => {
-                    setModalJefe(false);
-                    setSolicitudJefe(null);
-                    setMotivoJefe("");
-                  }}
-                  className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={tipoJefe === 'aprobar' ? aprobarPorJefe : rechazarPorJefe}
-                  disabled={tipoJefe === 'rechazar' && !motivoJefe}
-                  className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                    tipoJefe === 'aprobar'
-                      ? 'bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl' 
-                      : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:cursor-not-allowed'
-                  }`}
-                >
-                  {tipoJefe === 'aprobar' ? (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Aprobar Solicitud
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      Rechazar Solicitud
-                    </>
-                  )}
-                </button>
+              <button
+                onClick={() => {
+                  if (loadingJefe) return;
+                  setModalJefe(false);
+                  setSolicitudJefe(null);
+                  setMotivoJefe("");
+                  setLoadingJefe(false);
+                }}
+                disabled={loadingJefe}
+                className={`px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg transition-colors duration-200 ${
+                  loadingJefe 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={tipoJefe === 'aprobar' ? aprobarPorJefe : rechazarPorJefe}
+                disabled={(tipoJefe === 'rechazar' && !motivoJefe) || loadingJefe}
+                className={`px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-200 flex items-center gap-2 ${
+                  loadingJefe
+                    ? 'opacity-50 cursor-not-allowed'
+                    : tipoJefe === 'aprobar'
+                    ? 'bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl' 
+                    : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl'
+                } ${tipoJefe === 'rechazar' && !motivoJefe && !loadingJefe ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+              >
+                {loadingJefe ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Procesando...
+                  </>
+                ) : tipoJefe === 'aprobar' ? (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Aprobar Solicitud
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Rechazar Solicitud
+                  </>
+                )}
+              </button>
               </div>
             </div>
           </div>
