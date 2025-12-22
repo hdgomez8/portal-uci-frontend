@@ -169,23 +169,6 @@ const VacacionesPage = () => {
         return;
       }
 
-      // Cargar datos reales desde el backend
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al cargar solicitudes');
-      }
-
-      const data = await response.json();
-      
-      // Filtrar solicitudes según el rol del usuario
-      let solicitudesFiltradas = [];
-      
       // Obtener información del usuario desde localStorage si no está disponible
       let userInfo = user;
       if (!userInfo) {
@@ -198,12 +181,56 @@ const VacacionesPage = () => {
           console.error('Error al parsear usuario del localStorage:', error);
         }
       }
+
+      let data = [];
+      let response;
+
+      // Si el usuario es jefe de área, gerente o tiene rol de supervisión, usar endpoint específico
+      const rolesSupervision = ['JEFE AREA', 'GERENTE', 'ADMINISTRADOR', 'SUPER ADMIN'];
+      const tieneRolSupervision = userInfo?.roles?.some((rol) => rolesSupervision.includes(rol.nombre));
+      
+      if (tieneRolSupervision) {
+        // Usar endpoint específico para jefes que busca por áreas
+        const jefeId = userInfo?.empleado?.id || userInfo?.id;
+        console.log('🔍 Cargando vacaciones para jefe:', jefeId);
+        response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones/jefe?jefeId=${jefeId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al cargar solicitudes del jefe');
+        }
+        
+        data = await response.json();
+        console.log('📋 Vacaciones encontradas para jefe:', data.length);
+      } else {
+        // Para usuarios normales, cargar todas y filtrar
+        response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al cargar solicitudes');
+      }
+
+        data = await response.json();
+      }
+      
+      // Filtrar solicitudes según el rol del usuario
+      let solicitudesFiltradas = [];
       
       if (userInfo?.roles?.some((rol) => rol.nombre === 'ADMINISTRADOR')) {
         // Administradores ven solicitudes en revisión (aprobadas por jefe)
         solicitudesFiltradas = data.filter(solicitud => solicitud.estado === 'en_revision');
       } else if (userInfo?.roles?.some((rol) => rol.nombre === 'JEFE AREA')) {
-        // Jefes ven solicitudes según su departamento
+        // Si ya usamos el endpoint de jefe, los datos ya vienen filtrados por áreas
+        // Solo necesitamos filtrar por estado según el departamento
         const departamentoId = userInfo?.empleado?.areas?.[0]?.departamento?.id;
         
         if (departamentoId === 4) { // ADMINISTRACIÓN
@@ -217,22 +244,18 @@ const VacacionesPage = () => {
              solicitud.estado === 'aprobado_por_admin'
            );
         } else {
-          // Otros jefes ven solicitudes de su departamento
-          solicitudesFiltradas = data.filter(solicitud => 
-            solicitud.empleado?.areas?.[0]?.departamento?.id === departamentoId
-          );
+          // Otros jefes ven todas las solicitudes de sus áreas (ya filtradas por el endpoint)
+          solicitudesFiltradas = data;
         }
       } else if (userInfo?.roles?.some((rol) => rol.nombre === 'RRHH')) {
         // RRHH ve solicitudes aprobadas por administrador
         solicitudesFiltradas = data.filter(solicitud => solicitud.estado === 'aprobado_por_admin');
       } else {
         // Empleados normales solo ven sus propias solicitudes
-        // IMPORTANTE: user.id ≠ empleado.id, usar empleado.id
         const empleadoId = userInfo?.empleado?.id;
         if (empleadoId) {
           solicitudesFiltradas = data.filter(solicitud => solicitud.empleado_id === empleadoId);
         } else {
-          // Fallback: si no hay empleado.id, no mostrar nada
           solicitudesFiltradas = [];
           console.warn('No se pudo determinar el ID del empleado para el filtrado');
         }
@@ -1485,7 +1508,7 @@ const VacacionesPage = () => {
                 <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
                   <UserIcon className="w-5 h-5" />
                   Información del Solicitante
-                </h3>
+              </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
@@ -1497,8 +1520,8 @@ const VacacionesPage = () => {
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {solicitudActual?.empleado?.documento || solicitudActual?.cedula_colaborador || 'N/A'}
-                    </p>
-                  </div>
+                </p>
+              </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cargo</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -1787,7 +1810,7 @@ const VacacionesPage = () => {
                 <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
                   <UserIcon className="w-5 h-5" />
                   Información del Solicitante
-                </h3>
+              </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
@@ -1799,8 +1822,8 @@ const VacacionesPage = () => {
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {solicitudActual?.empleado?.documento || solicitudActual?.cedula_colaborador || 'N/A'}
-                    </p>
-                  </div>
+                </p>
+              </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cargo</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -2089,7 +2112,7 @@ const VacacionesPage = () => {
                 <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3 flex items-center gap-2">
                   <UserIcon className="w-5 h-5" />
                   Información del Solicitante
-                </h3>
+              </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre</p>
@@ -2101,8 +2124,8 @@ const VacacionesPage = () => {
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documento</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
                       {solicitudActual?.empleado?.documento || solicitudActual?.cedula_colaborador || 'N/A'}
-                    </p>
-                  </div>
+                </p>
+              </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cargo</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
