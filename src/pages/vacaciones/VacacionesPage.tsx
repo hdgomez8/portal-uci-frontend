@@ -193,6 +193,7 @@ const VacacionesPage = () => {
         // Usar endpoint específico para jefes que busca por áreas
         const jefeId = userInfo?.empleado?.id || userInfo?.id;
         console.log('🔍 Cargando vacaciones para jefe:', jefeId);
+        console.log('🔍 URL:', `${import.meta.env.VITE_API_URL}/vacaciones/jefe?jefeId=${jefeId}`);
         response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones/jefe?jefeId=${jefeId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -201,11 +202,14 @@ const VacacionesPage = () => {
         });
         
         if (!response.ok) {
-          throw new Error('Error al cargar solicitudes del jefe');
+          const errorText = await response.text();
+          console.error('❌ Error en respuesta:', response.status, errorText);
+          throw new Error(`Error al cargar solicitudes del jefe: ${response.status}`);
         }
         
         data = await response.json();
         console.log('📋 Vacaciones encontradas para jefe:', data.length);
+        console.log('📋 Primeras 3 vacaciones:', data.slice(0, 3));
       } else {
         // Para usuarios normales, cargar todas y filtrar
         response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones`, {
@@ -230,23 +234,11 @@ const VacacionesPage = () => {
         solicitudesFiltradas = data.filter(solicitud => solicitud.estado === 'en_revision');
       } else if (userInfo?.roles?.some((rol) => rol.nombre === 'JEFE AREA')) {
         // Si ya usamos el endpoint de jefe, los datos ya vienen filtrados por áreas
-        // Solo necesitamos filtrar por estado según el departamento
-        const departamentoId = userInfo?.empleado?.areas?.[0]?.departamento?.id;
-        
-        if (departamentoId === 4) { // ADMINISTRACIÓN
-          // Jefes de administración ven TODAS las solicitudes "en_revision"
-          solicitudesFiltradas = data.filter(solicitud => 
-            solicitud.estado === 'en_revision'
-          );
-                 } else if (departamentoId === 2) { // RRHH
-           // Jefes de RRHH ven solicitudes "aprobado_por_admin"
-           solicitudesFiltradas = data.filter(solicitud => 
-             solicitud.estado === 'aprobado_por_admin'
-           );
-        } else {
-          // Otros jefes ven todas las solicitudes de sus áreas (ya filtradas por el endpoint)
-          solicitudesFiltradas = data;
-        }
+        // Para la pestaña "listado", mostrar TODAS las solicitudes de sus áreas (sin filtrar por estado)
+        // El filtrado por estado se hace solo para las pestañas de revisión
+        solicitudesFiltradas = data; // Mostrar todas las solicitudes de las áreas del jefe
+        console.log('📋 Solicitudes para jefe (sin filtrar por estado):', solicitudesFiltradas.length);
+        console.log('📋 Estados de las solicitudes:', solicitudesFiltradas.map(s => s.estado));
       } else if (userInfo?.roles?.some((rol) => rol.nombre === 'RRHH')) {
         // RRHH ve solicitudes aprobadas por administrador
         solicitudesFiltradas = data.filter(solicitud => solicitud.estado === 'aprobado_por_admin');
@@ -262,6 +254,7 @@ const VacacionesPage = () => {
       }
       
       setSolicitudes(solicitudesFiltradas);
+      console.log('✅ Solicitudes finales establecidas en estado:', solicitudesFiltradas.length);
       
       // Filtrar solicitudes en revisión según el rol
       if (userInfo?.roles?.some((rol) => rol.nombre === 'JEFE AREA')) {
