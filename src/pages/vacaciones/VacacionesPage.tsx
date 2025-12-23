@@ -133,6 +133,26 @@ const VacacionesPage = () => {
     }
   };
 
+  // Función auxiliar para formatear fechas sin problemas de zona horaria
+  const formatearFecha = (fechaString) => {
+    if (!fechaString) return 'N/A';
+    
+    // Si la fecha viene en formato ISO (YYYY-MM-DD), parsearla manualmente
+    // para evitar problemas de zona horaria
+    if (typeof fechaString === 'string' && fechaString.match(/^\d{4}-\d{2}-\d{2}/)) {
+      const [year, month, day] = fechaString.split('T')[0].split('-');
+      const fecha = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return fecha.toLocaleDateString('es-ES');
+    }
+    
+    // Si ya es un objeto Date o otro formato, usar el método estándar
+    const fecha = new Date(fechaString);
+    // Verificar que la fecha sea válida
+    if (isNaN(fecha.getTime())) return 'N/A';
+    
+    return fecha.toLocaleDateString('es-ES');
+  };
+
   // Función para manejar la selección de archivo PDF
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -842,7 +862,7 @@ const VacacionesPage = () => {
                         <div>
                           <span className="font-medium text-gray-900">{solicitud.empleado?.nombres}</span>
                           <div className="text-sm text-gray-500">
-                            {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                            {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                           </div>
                         </div>
                       </div>
@@ -936,7 +956,7 @@ const VacacionesPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                          {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -1005,7 +1025,7 @@ const VacacionesPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                            {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1099,7 +1119,7 @@ const VacacionesPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                            {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1193,7 +1213,7 @@ const VacacionesPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                            {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1288,7 +1308,7 @@ const VacacionesPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                            {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1387,7 +1407,7 @@ const VacacionesPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(solicitud.periodo_disfrute_desde).toLocaleDateString()} - {new Date(solicitud.periodo_disfrute_hasta).toLocaleDateString()}
+                            {formatearFecha(solicitud.periodo_disfrute_desde)} - {formatearFecha(solicitud.periodo_disfrute_hasta)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1548,7 +1568,7 @@ const VacacionesPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.fecha_solicitud ? new Date(solicitudActual.fecha_solicitud).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.fecha_solicitud)}
                     </p>
                   </div>
                   <div>
@@ -1560,25 +1580,25 @@ const VacacionesPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Desde</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_cumplido_desde ? new Date(solicitudActual.periodo_cumplido_desde).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_cumplido_desde)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Hasta</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_cumplido_hasta ? new Date(solicitudActual.periodo_cumplido_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_cumplido_hasta)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Desde</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_disfrute_desde ? new Date(solicitudActual.periodo_disfrute_desde).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_disfrute_desde)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Hasta</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_disfrute_hasta ? new Date(solicitudActual.periodo_disfrute_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_disfrute_hasta)}
                     </p>
                   </div>
                   <div>
@@ -1850,7 +1870,7 @@ const VacacionesPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.fecha_solicitud ? new Date(solicitudActual.fecha_solicitud).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.fecha_solicitud)}
                     </p>
                   </div>
                   <div>
@@ -1862,25 +1882,25 @@ const VacacionesPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Desde</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_cumplido_desde ? new Date(solicitudActual.periodo_cumplido_desde).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_cumplido_desde)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Hasta</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_cumplido_hasta ? new Date(solicitudActual.periodo_cumplido_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_cumplido_hasta)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Desde</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_disfrute_desde ? new Date(solicitudActual.periodo_disfrute_desde).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_disfrute_desde)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Hasta</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_disfrute_hasta ? new Date(solicitudActual.periodo_disfrute_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_disfrute_hasta)}
                     </p>
                   </div>
                   <div>
@@ -2152,7 +2172,7 @@ const VacacionesPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Solicitud</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.fecha_solicitud ? new Date(solicitudActual.fecha_solicitud).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.fecha_solicitud)}
                     </p>
                   </div>
                   <div>
@@ -2164,25 +2184,25 @@ const VacacionesPage = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Desde</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_cumplido_desde ? new Date(solicitudActual.periodo_cumplido_desde).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_cumplido_desde)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Cumplido Hasta</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_cumplido_hasta ? new Date(solicitudActual.periodo_cumplido_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_cumplido_hasta)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Desde</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_disfrute_desde ? new Date(solicitudActual.periodo_disfrute_desde).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_disfrute_desde)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Período Disfrute Hasta</p>
                     <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {solicitudActual?.periodo_disfrute_hasta ? new Date(solicitudActual.periodo_disfrute_hasta).toLocaleDateString('es-ES') : 'N/A'}
+                      {formatearFecha(solicitudActual?.periodo_disfrute_hasta)}
                     </p>
                   </div>
                   <div>
