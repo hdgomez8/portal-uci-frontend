@@ -154,9 +154,9 @@ const VacacionesPage = () => {
     return fecha.toLocaleDateString('es-ES');
   };
 
-  // Obtiene la URL pública del PDF asociado a una solicitud
-  const obtenerUrlArchivoSolicitud = (solicitud) => {
-    if (!solicitud) return null;
+  // Genera posibles URLs públicas del PDF asociado a una solicitud (con fallback de 'uploads/')
+  const obtenerUrlsArchivoSolicitud = (solicitud) => {
+    if (!solicitud) return [];
 
     const posiblesRutas = [
       solicitud.archivo_pdf,
@@ -167,36 +167,67 @@ const VacacionesPage = () => {
       solicitud.adjunto
     ].filter((ruta) => typeof ruta === 'string' && ruta.trim().length > 0);
 
-    if (posiblesRutas.length === 0) return null;
+    if (posiblesRutas.length === 0) return [];
 
     const rutaElegida = posiblesRutas.find((ruta) => ruta.startsWith('http')) || posiblesRutas[0];
+
+    // Si ya es absoluta, solo devolverla
     if (rutaElegida.startsWith('http')) {
-      return rutaElegida;
+      return [rutaElegida];
     }
 
     const rutaNormalizada = normalizarRutaAdjunto(rutaElegida);
-    return buildAdjuntoUrl(rutaNormalizada);
+    const candidatos = [
+      buildAdjuntoUrl(rutaNormalizada),
+    ];
+
+    // Fallback: probar con prefijo uploads/ si el backend sirve así
+    if (!rutaNormalizada.startsWith('uploads/')) {
+      candidatos.push(buildAdjuntoUrl(`uploads/${rutaNormalizada}`));
+    }
+
+    // Incluir la ruta original por si normalizar quitó algo necesario
+    if (rutaNormalizada !== rutaElegida) {
+      candidatos.push(buildAdjuntoUrl(rutaElegida));
+    }
+
+    // Quitar duplicados
+    return Array.from(new Set(candidatos));
   };
 
   // Descarga el PDF de vacaciones de la solicitud seleccionada
   const descargarArchivoSolicitud = async (solicitud) => {
     try {
-      const url = obtenerUrlArchivoSolicitud(solicitud);
-      if (!url) {
+      const urls = obtenerUrlsArchivoSolicitud(solicitud);
+      if (!urls.length) {
         toast.error('No hay archivo de vacaciones disponible');
         return;
       }
 
       const token = localStorage.getItem('token');
-      const response = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
+      let blob = null;
+      let ultimaRespuesta = null;
 
-      if (!response.ok) {
+      for (const url of urls) {
+        const response = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+
+        ultimaRespuesta = response;
+
+        if (response.ok) {
+          blob = await response.blob();
+          break;
+        }
+      }
+
+      if (!blob) {
+        const status = ultimaRespuesta?.status;
+        const texto = ultimaRespuesta ? await ultimaRespuesta.text().catch(() => '') : '';
+        console.error('No se pudo descargar el archivo. Última respuesta:', status, texto);
         throw new Error('No se pudo descargar el archivo');
       }
 
-      const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
@@ -1056,7 +1087,7 @@ const VacacionesPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {obtenerUrlArchivoSolicitud(solicitud) ? (
+                        {obtenerUrlsArchivoSolicitud(solicitud).length ? (
                           <button
                             onClick={() => descargarArchivoSolicitud(solicitud)}
                             className="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors"
