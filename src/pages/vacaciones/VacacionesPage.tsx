@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { CheckCircle, XCircle, Clock, Eye, Plus, AlertCircle, Calendar, User as UserIcon } from 'lucide-react';
 import Loader from '../../components/Loader';
+import { buildAdjuntoUrl, normalizarRutaAdjunto } from '../../services/api';
 
 const VacacionesPage = () => {
   const user = JSON.parse(localStorage.getItem("usuario") || "null");
@@ -153,6 +154,66 @@ const VacacionesPage = () => {
     return fecha.toLocaleDateString('es-ES');
   };
 
+  // Obtiene la URL pública del PDF asociado a una solicitud
+  const obtenerUrlArchivoSolicitud = (solicitud) => {
+    if (!solicitud) return null;
+
+    const posiblesRutas = [
+      solicitud.archivo_pdf,
+      solicitud.archivo,
+      solicitud.archivoAdjunto,
+      solicitud.ruta_archivo,
+      solicitud.ruta_pdf,
+      solicitud.adjunto
+    ].filter((ruta) => typeof ruta === 'string' && ruta.trim().length > 0);
+
+    if (posiblesRutas.length === 0) return null;
+
+    const rutaElegida = posiblesRutas.find((ruta) => ruta.startsWith('http')) || posiblesRutas[0];
+    if (rutaElegida.startsWith('http')) {
+      return rutaElegida;
+    }
+
+    const rutaNormalizada = normalizarRutaAdjunto(rutaElegida);
+    return buildAdjuntoUrl(rutaNormalizada);
+  };
+
+  // Descarga el PDF de vacaciones de la solicitud seleccionada
+  const descargarArchivoSolicitud = async (solicitud) => {
+    try {
+      const url = obtenerUrlArchivoSolicitud(solicitud);
+      if (!url) {
+        toast.error('No hay archivo de vacaciones disponible');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo descargar el archivo');
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const nombreArchivo = `vacaciones_${solicitud.id || 'solicitud'}.pdf`;
+      link.download = nombreArchivo;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      toast.success('Archivo descargado correctamente');
+    } catch (error) {
+      console.error('Error al descargar archivo de vacaciones:', error);
+      toast.error('Error al descargar el archivo de vacaciones');
+    }
+  };
+
   // Función para manejar la selección de archivo PDF
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -207,9 +268,27 @@ const VacacionesPage = () => {
 
       // Si el usuario es jefe de área, gerente o tiene rol de supervisión, usar endpoint específico
       const rolesSupervision = ['JEFE AREA', 'GERENTE', 'ADMINISTRADOR', 'SUPER ADMIN'];
+      const esJefeArea = userInfo?.roles?.some((rol) => rol.nombre === 'JEFE AREA');
+      const departamentoId = userInfo?.empleado?.areas?.[0]?.departamento?.id;
+      const esJefeRRHH = esJefeArea && departamentoId === 2; // RRHH
       const tieneRolSupervision = userInfo?.roles?.some((rol) => rolesSupervision.includes(rol.nombre));
       
-      if (tieneRolSupervision) {
+      if (esJefeRRHH) {
+        // Jefe de RRHH necesita ver todas las solicitudes (no solo las de su área)
+        response = await fetch(`${import.meta.env.VITE_API_URL}/vacaciones`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar solicitudes para RRHH');
+        }
+
+        data = await response.json();
+        console.log('📋 Vacaciones para jefe RRHH (todas):', data.length);
+      } else if (tieneRolSupervision) {
         // Usar endpoint específico para jefes que busca por áreas
         const jefeId = userInfo?.empleado?.id || userInfo?.id;
         console.log('🔍 Cargando vacaciones para jefe:', jefeId);
@@ -248,11 +327,12 @@ const VacacionesPage = () => {
       
       // Filtrar solicitudes según el rol del usuario
       let solicitudesFiltradas = [];
+      const estadosRevisionRRHH = ['aprobado_por_admin', 'aprobado_por_administrador', 'en_revision_rrhh', 'en_revision'];
       
       if (userInfo?.roles?.some((rol) => rol.nombre === 'ADMINISTRADOR')) {
         // Administradores ven solicitudes en revisión (aprobadas por jefe)
         solicitudesFiltradas = data.filter(solicitud => solicitud.estado === 'en_revision');
-      } else if (userInfo?.roles?.some((rol) => rol.nombre === 'JEFE AREA')) {
+      } else if (esJefeArea) {
         // Si ya usamos el endpoint de jefe, los datos ya vienen filtrados por áreas
         // Para la pestaña "listado", mostrar TODAS las solicitudes de sus áreas (sin filtrar por estado)
         // El filtrado por estado se hace solo para las pestañas de revisión
@@ -261,7 +341,7 @@ const VacacionesPage = () => {
         console.log('📋 Estados de las solicitudes:', solicitudesFiltradas.map(s => s.estado));
       } else if (userInfo?.roles?.some((rol) => rol.nombre === 'RRHH')) {
         // RRHH ve solicitudes aprobadas por administrador
-        solicitudesFiltradas = data.filter(solicitud => solicitud.estado === 'aprobado_por_admin');
+        solicitudesFiltradas = data.filter(solicitud => estadosRevisionRRHH.includes(solicitud.estado));
       } else {
         // Empleados normales solo ven sus propias solicitudes
         const empleadoId = userInfo?.empleado?.id;
@@ -277,7 +357,7 @@ const VacacionesPage = () => {
       console.log('✅ Solicitudes finales establecidas en estado:', solicitudesFiltradas.length);
       
       // Filtrar solicitudes en revisión según el rol
-      if (userInfo?.roles?.some((rol) => rol.nombre === 'JEFE AREA')) {
+      if (esJefeArea) {
         const departamentoId = userInfo?.empleado?.areas?.[0]?.departamento?.id;
         
         if (departamentoId === 4) { // ADMINISTRACIÓN
@@ -288,7 +368,7 @@ const VacacionesPage = () => {
           const pendientesData = solicitudesFiltradas.filter(solicitud => solicitud.estado === 'pendiente');
           setEnRevision(pendientesData);
         } else if (departamentoId === 2) { // RRHH
-          const enRevisionRRHHData = solicitudesFiltradas.filter(solicitud => solicitud.estado === 'aprobado_por_admin');
+          const enRevisionRRHHData = solicitudesFiltradas.filter(solicitud => estadosRevisionRRHH.includes(solicitud.estado));
           setEnRevisionRRHH(enRevisionRRHHData);
           // También ven solicitudes "pendiente" para la pestaña general de jefes
           const pendientesData = solicitudesFiltradas.filter(solicitud => solicitud.estado === 'pendiente');
@@ -306,7 +386,7 @@ const VacacionesPage = () => {
         setEnRevisionAdministracion([]);
         setEnRevisionRRHH([]); // Limpiar RRHH si es administrador
       } else if (userInfo?.roles?.some((rol) => rol.nombre === 'RRHH')) {
-        const enRevisionData = solicitudesFiltradas.filter(solicitud => solicitud.estado === 'aprobado_por_admin');
+        const enRevisionData = solicitudesFiltradas.filter(solicitud => estadosRevisionRRHH.includes(solicitud.estado));
         setEnRevision(enRevisionData);
         setEnRevisionAdministracion([]);
         setEnRevisionRRHH([]); // Limpiar RRHH si es RRHH
@@ -450,6 +530,9 @@ const VacacionesPage = () => {
         return <XCircle className="text-red-600 w-4 h-4" />;
       case 'en revisión':
       case 'en_revision':
+      case 'en_revision_rrhh':
+      case 'aprobado_por_admin':
+      case 'aprobado_por_administrador':
         return <Eye className="text-blue-600 w-4 h-4" />;
       case 'pendiente':
         return <Clock className="text-amber-600 w-4 h-4" />;
@@ -470,6 +553,9 @@ const VacacionesPage = () => {
         return 'bg-red-50 text-red-800 border border-red-200 shadow-sm';
       case 'en revisión':
       case 'en_revision':
+      case 'en_revision_rrhh':
+      case 'aprobado_por_admin':
+      case 'aprobado_por_administrador':
         return 'bg-blue-50 text-blue-800 border border-blue-200 shadow-sm';
       case 'pendiente':
         return 'bg-amber-50 text-amber-800 border border-amber-200 shadow-sm';
@@ -937,6 +1023,7 @@ const VacacionesPage = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Período</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Archivo</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -967,6 +1054,19 @@ const VacacionesPage = () => {
                           {getEstadoIcon(solicitud.estado)}
                           {solicitud.estado?.replace('_', ' ').toUpperCase()}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {obtenerUrlArchivoSolicitud(solicitud) ? (
+                          <button
+                            onClick={() => descargarArchivoSolicitud(solicitud)}
+                            className="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-full hover:bg-blue-700 transition-colors"
+                            title="Descargar solicitud de vacaciones"
+                          >
+                            ⬇️ Descargar
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400">Sin archivo</span>
+                        )}
                       </td>
                     </tr>
                   ))}
